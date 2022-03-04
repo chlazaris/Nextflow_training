@@ -11,7 +11,7 @@ nextflow.enable.dsl = 2
 
 ```
 
-Now you can write a simple process and the corresponding output:
+Now you can write a simple process and the corresponding output: s
 
 ```
 params.greetings="Hello world"
@@ -26,11 +26,24 @@ process writeText {
   file "hello.txt"
 
   script:
-  cat $x > hello.txt
+  """
+  echo ${x} > hello.txt
+  """
 }
 
 // Specify the workflow
 workflow {
     writeText(greeting)
 }
+```
+
+Now, order to run the workflow after having Nextflow installed, you need
+to run the following: `nextflow run main.nf` where `main.nf` is the name
+of the script containing the code above.
+
+To publish the output text file in a directory, we need to use `publishDir`
+as shown below:
+
+```
+publishDir "Hello", copy: true
 ```
