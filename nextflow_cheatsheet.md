@@ -47,3 +47,15 @@ as shown below:
 ```
 publishDir "Hello", copy: true
 ```
+
+**Some useful file attributes**
+
+|Attribute|What it does|
+|---------|------------|
+| getName | gets the name of the file (ignores the path) |
+| getBaseName | gets the file name without its extension |
+| getSimpleName | gets the file name after removing any extension |
+| getExtension | gets the extension of the file |
+| exists | check if the file exists |
+| isFile | returns `true` if it a regular file |
+| isDirectory | returns `true` if it is directory |
