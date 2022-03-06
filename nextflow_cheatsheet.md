@@ -71,3 +71,58 @@ log.info """
 
 Between the triple brackets (`"""`), we include the parameters and their usage,
 as well as the outputs.
+
+### Specifying the inputs
+
+A way to specify a channel from different values, is the following:
+
+```
+value_ch = Channel.from(1,2,3)
+```
+
+Another way to achieve the same result is:
+
+```
+Channel.from(1,2,3)
+  .set{value_ch}
+```
+
+To create a `value` channel, we use the `value` factory method. For example:
+
+```
+example_1 = Channel.value()
+example_2 = Channel.value('Hello there!')
+example_3 = Channel.value([1,2,3,4,5])
+```
+
+To create a channel which emits list elements, we can use the `fromList` method:
+
+```
+example_1 = Channel.fromList([1,2,3,4])
+```
+
+To create a channel from paths, we can use the `fromPath` method:
+
+```
+example_1 = Channel.fromPath('/path/file.txt')
+```
+
+To check if the file exists, we need to add `checkIfExists: true` as shown
+below:
+
+```
+example_1 = Channel.fromPath('/path/file.txt', checkIfExists: true)
+```
+
+To get the file pairs matching a glob pattern, we need to use the `fromFilePairs`
+method:
+
+```
+example_1 = Channel.fromFilePairs('/path/*_{1,2}.fastq')
+```
+
+Finally, to retrieve records directly from SRA, we use the method `fromSRA`:
+
+```
+example_1 = Channel.fromSRA('SRP043510')
+```
