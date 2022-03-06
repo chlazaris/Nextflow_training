@@ -59,3 +59,15 @@ publishDir "Hello", copy: true
 | exists | check if the file exists |
 | isFile | returns `true` if it a regular file |
 | isDirectory | returns `true` if it is directory |
+
+To include `log` information for the pipeline, we include the following in the
+`.nf` file:
+
+```
+log.info """
+         """
+         .stripIndent()
+```
+
+Between the triple brackets (`"""`), we include the parameters and their usage,
+as well as the outputs.
