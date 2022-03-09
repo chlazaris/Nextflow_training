@@ -211,7 +211,8 @@ Channel
 ```
 #### Transforming operators
 
-**Transforming operators** are operators that get the items emitted by a channel and they transform them to new values
+**Transforming operators** are operators that get the items emitted by a channel
+and they transform them to new values
 
 **map:** This operator applies a chosen function to every item of a channel
 
@@ -222,7 +223,8 @@ Channel
   .subscribe onNext: {println it}, onComplete: {println "Done!"}
 ```
 
-**flatMap:** This operator is like map but here instead of a list of items, each item is returned individually
+**flatMap:** This operator is like map but here instead of a list of items,
+each item is returned individually
 
 ```
 Channel
@@ -233,8 +235,8 @@ Channel
 
 [comment]: # (To be added // reduce)
 
-**groupTuple:** This operator groups items emitted by a channel using a mapping function which associates a value
-with a key
+**groupTuple:** This operator groups items emitted by a channel using a mapping
+function which associates a value with a key
 
 ```
 Channel
@@ -244,7 +246,8 @@ Channel
 ```
 
 **collate:** The collate operator transforms a channel
-in such a way that the emitted items are grouped in tuples containing n number of items where n is specified by the user
+in such a way that the emitted items are grouped in tuples containing n number
+of items where n is specified by the user
 
 ```
 Channel
@@ -288,7 +291,8 @@ Channel
   .view()
 ```
 
-**Collect:** This operator collect all the items emitted from a channel to a list and returns them as a single list object
+**Collect:** This operator collect all the items emitted from a channel to a
+list and returns them as a single list object
 
 ```
 Channel
@@ -315,7 +319,8 @@ Channel
   .view()
 ```
 
-**flatten:** This operator transforms a channel so that each item is emitted seperately even if it originally belongs to a collection or an array
+**flatten:** This operator transforms a channel so that each item is emitted
+separately even if it originally belongs to a collection or an array
 
 ```
 Channel
