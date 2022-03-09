@@ -209,3 +209,117 @@ Channel
   .until({it == 49})
   .view()
 ```
+#### Transforming operators
+
+**Transforming operators** are operators that get the items emitted by a channel and they transform them to new values
+
+**map:** This operator applies a chosen function to every item of a channel
+
+```
+Channel
+  .from(1, 2, 3, 4)
+  .map({it * it})
+  .subscribe onNext: {println it}, onComplete: {println "Done!"}
+```
+
+**flatMap:** This operator is like map but here instead of a list of items, each item is returned individually
+
+```
+Channel
+  .from(1, 2, 3, 4)
+  .flatMap({it * it})
+  .view()
+```
+
+[comment]: # (To be added // reduce)
+
+**groupTuple:** This operator groups items emitted by a channel using a mapping function which associates a value
+with a key
+
+```
+Channel
+  .from( [1, 'A'], [1, 'B'], [2, 'A'], [2, 'c'] )
+  .groupTuple()
+  .view()
+```
+
+**collate:** The collate operator transforms a channel
+in such a way that the emitted items are grouped in tuples containing n number of items where n is specified by the user
+
+```
+Channel
+  .from(1..7)
+  .collate(3)
+  .view()
+```
+Now, if we want to get rid of the remaining item
+
+```
+Channel
+  .from(1..7)
+  .collate(3, false)
+  .view()
+```
+
+**buffer:** This is an operator that buffers (subsets)
+the values to be returned based on certain conditions
+
+```
+// Specify end condition
+Channel
+  .from(1..100)
+  .buffer(5)
+  .view()
+```
+
+```
+// Specify start and end condition
+Channel
+  .from(1..100)
+  .buffer(10, 20)
+  .view()
+```
+
+```
+// Specify size
+Channel
+  .from(1..100)
+  .buffer(size: 3, remainder: false)
+  .view()
+```
+
+**Collect:** This operator collect all the items emitted from a channel to a list and returns them as a single list object
+
+```
+Channel
+  .from(1..10)
+  .collect()
+  .view()
+```
+
+**toList:** This operator does what collect does
+
+```
+Channel
+  .from(1..10)
+  .toList()
+  .view()
+```
+
+**toSortedList:** This operator returns the items in a sorted list
+
+```
+Channel
+  .from(1, 2, 8, 5, 3, 4)
+  .toSortedList()
+  .view()
+```
+
+**flatten:** This operator transforms a channel so that each item is emitted seperately even if it originally belongs to a collection or an array
+
+```
+Channel
+  .from(1, [3, 4], 8, [34, 35, 36])
+  .flatten()
+  .view()
+```
