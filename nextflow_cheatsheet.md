@@ -11,7 +11,67 @@ nextflow.enable.dsl = 2
 
 ```
 
-Now you can write a simple process and the corresponding output: s
+How does a process look like:
+
+```
+process < name > {
+
+  [ directives ]        
+
+  input:                
+  < process inputs >
+
+  output:               
+  < process outputs >
+
+  when:                 
+  < condition >
+
+  [script|shell|exec]:  
+  """
+  < user script to be executed >
+  """
+}
+```
+The `script` block defines the command to be executed. This block is interpreted by default as `bash` script
+but other code can be used too if the `Shebang` declaration is present:
+
+```
+process pyStuff {
+  script:
+  """
+  #!/usr/bin/env python
+  print("Hello world!")
+  """
+}
+```
+
+If, instead of using `"""`, `'''` are used, then `Bash` variables can be directly called without escaping `$`. For example:
+
+```
+process bar {
+  script:
+  '''
+  echo $PATH | tr ':' '\n'
+  '''
+}
+```
+
+Insted of `script`, `shell` can be used in order to mix `Bash` variables and `Nextflow` variables. In this case, `Nextflow` variables should be defined using the `!{..}` syntax:
+
+```
+params.data = 'le monde'
+
+process baz {
+  shell:
+  '''
+  X = 'Bonjour'
+  echo $X !{params.data}
+  '''
+}
+```
+
+Now you can write a simple process and the corresponding output:
 
 ```
 params.greetings="Hello world"
