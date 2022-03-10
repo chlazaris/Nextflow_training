@@ -319,12 +319,62 @@ Channel
   .view()
 ```
 
-**flatten:** This operator transforms a channel so that each item is emitted
-separately even if it originally belongs to a collection or an array
+**flatten:** This operator transforms a channel so that each item is emitted separately even if it originally belongs to a collection or an array
 
 ```
 Channel
   .from(1, [3, 4], 8, [34, 35, 36])
   .flatten()
   .view()
+```
+
+#### Combining operators
+
+The `combining operators` combine the emitted values from multiple channels
+
+**join:** The `join` operator creates a channel that joins together the items emitted by two channels when a matching key exists
+
+```
+ch1 = Channel.from(['X', 1], ['Y', 2])
+ch2 = Channel.from(['X', 6], ['Y', 3])
+ch1.join(ch2).view()
+```
+
+**mix:** The `mix` operator combines the items of more than one channels into one
+
+```
+c1 = Channel.from( 1,2,3 )
+c2 = Channel.from( 'a','b','c' )
+c3 = Channel.from( 'y','z' )
+c1.mix(c2, c3).view()
+```
+
+**collectFile:** The `collectFile` operator collects the channel emissions and saves them into one or more files
+
+```
+Channel
+    .from('alpha', 'beta', 'gamma')
+    .collectFile(name: 'sample.txt', newLine: true)
+    .subscribe {
+        println "Entries are saved to file: $it"
+        println "File content is: ${it.text}"
+    }
+```
+
+**combine:** The `combine` operator returns the Cartesian product of items emitted by two channels
+
+```
+ch1 = Channel.from(1..5)
+ch2 = Channel.from('A'..'C')
+ch1.combine(ch2).view()
+```
+
+**concat:** The `concat` operator concatenates and returns the items from two or more channels but unlike `mix` it
+retains the order
+
+```
+a = Channel.from('a','b','c')
+b = Channel.from(1,2,3)
+c = Channel.from('p','q')
+c.concat( b, a ).view()
 ```
