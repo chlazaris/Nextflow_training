@@ -97,7 +97,7 @@ workflow {
 }
 ```
 
-Now, order to run the workflow after having Nextflow installed, you need
+Now, in order to run the workflow after having Nextflow installed, you need
 to run the following: `nextflow run main.nf` where `main.nf` is the name
 of the script containing the code above.
 
@@ -106,6 +106,77 @@ as shown below:
 
 ```
 publishDir "Hello", copy: true
+```
+
+### Specific notes on DSL2
+
+DSL2 allows us to write functions, such as the ones shown below:
+
+```
+// Write a function
+def print_on_console(x) {
+  println x
+}
+
+print_on_console("Hello!")
+```
+The function returns the last evaluated expression, unless a `return` statement
+is provided explicitly, as in the example given below:
+
+```
+def fib (x) {
+  if (x <= 1)
+    return x
+  else
+    fib(x - 1) + fib(x - 2)
+}
+
+println fib(3)
+```
+Using `DSL2` processes are specified and there is no need for using the words
+`from` and `into` for creating channels. Then in the `workflow`, the processes
+run along their inputs are specified.
+
+Here is a process which prints the corresponding input:
+
+```
+process printWord{
+  input:
+  val x
+
+  output:
+  stdout
+
+  script:
+  """
+  echo $x
+  """
+}
+```
+Here is another process which converts the input to uppercase:
+
+```
+process upper{
+  input:
+  val x
+
+  output:
+  stdout
+
+  script:
+  """
+  echo "$x" | tr '[a-z]' '[A-Z]'
+  """
+}
+```
+The output of the first process ("hello") becomes input for the second one,
+converting lowercase `hello` to uppercase `HELLO`.
+
+```
+workflow {
+  a = printWord("hello")
+  upper(a).view()
+}
 ```
 
 **Some useful file attributes**
