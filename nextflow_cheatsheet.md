@@ -17,13 +17,13 @@ nextflow.enable.dsl = 2
 - **Computing environment and resources** are set up to run the pipeline: 
     - Will it run on a local machine, a high-performance computing environment (HPC) or the cloud?
     - How much CPU or memory will be used? 
-In the context of Nextflow, these are specified by [Executors](https://www.nextflow.io/docs/latest/executor.html) and often stored in separate [configuration files](https://www.nextflow.io/docs/latest/config.html). 
+    - In the context of Nextflow, these are specified by [Executors](https://www.nextflow.io/docs/latest/executor.html) and often stored in separate [configuration files](https://www.nextflow.io/docs/latest/config.html). 
 
 
 ### A minimal example
 ```
 #!/usr/bin/env nextflow
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
 // Create input channel. Each .txt file is one element.
 input_ch = Channel.fromPath( "*.txt" )  
@@ -72,7 +72,7 @@ process p2 {
 }
 ```
 
-### Channels
+## Channels
 
 A way to specify a channel from different values, is the following:
 
@@ -381,7 +381,7 @@ c = Channel.from('p','q')
 c.concat( b, a ).view()
 ```
 
-### Processes
+## Processes
 
 Here are the major components of a `process`:
 
@@ -491,7 +491,7 @@ Files are often used as inputs and/or outputs in processes and thus knowing some
 | isFile | returns `true` if it is a regular file |
 | isDirectory | returns `true` if it is a directory |
 
-### Workflows
+## Workflows
 
 `Workflows` are sets of processes that take some inputs through a series of steps in order to produce a certain output. In a workflow, the contents of a channel can become input to another process. Thus, multiple processes can be chained. As an example, in the following workflow, a channel with the word `Hello` is created by the process `printWord` and the content of this channel is passed to the process `upper` to print `HELLO` 
 
@@ -546,7 +546,7 @@ To publish the output text file in a directory, we need to use `publishDir` as s
 publishDir "Hello", copy: true
 ```
 
-### Modules in DLS2
+## Modules in DLS2
 
 A main advantage of the `DSL2` syntax extension is the ability to write and use `modules`. Modules can be included and shared across workflows. Thus, code repetition can be avoided and Nextflow pipelines become more succinct. In addition, the nf-core community maintains high-quality modules for commonly used tools, which can be found here: [Nextflow modules](https://github.com/nf-core/modules/tree/master/modules). 
 
@@ -574,7 +574,8 @@ workflow {
     bar(data)
 }    
 ```
-### Functions in DSL2
+
+## Functions in DSL2
 
 DSL2 allows us to write functions, such as the ones shown below:
 
