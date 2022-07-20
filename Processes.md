@@ -182,9 +182,16 @@ The `shell` block is a string statement that defines the *shell* command execute
 In this way it is possible to use both Nextflow and Bash variables in the same piece of code without having to escape the latter and making process scripts more readable and easy to maintain. For example:
 
 ```
+#!/usr/bin/env nextflow
+
+nextflow.enable.dsl=2
+
 process myTask {
   input:
   val str
+
+  output:
+  stdout
 
   shell:
   '''
@@ -194,7 +201,7 @@ process myTask {
 
 workflow {
   greetings_ch = Channel.of('Hello', 'Hola', 'Bonjour')
-  myTask(greetins_ch).view()
+  myTask(greetings_ch).view()
 }
 ```
 
