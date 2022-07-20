@@ -92,13 +92,145 @@ In this example the `$MAX` variable has to be defined somewhere before, in the p
 
 ### Scripts a la carte
 
+The process script is interpreted by Nextflow as a Bash script by default, but you are not limited to it.
+
+You can use your favourite scripting language (e.g. Perl, Python, Ruby, R, etc), or even mix them in the same pipeline.
+
+A pipeline may be composed by processes that execute very different tasks. Using Nextflow you can choose the scripting language that better fits the task carried out by a specified process. For example for some processes R could be more useful than Perl, in other you may need to use Python because it provides better access to a library or an API, etc.
+
+To use a scripting other than Bash, simply start your process script with the corresponding [shebang](http://en.wikipedia.org/wiki/Shebang_(Unix)) declaration. For example:
+
+```
+process perlStuff {
+    """
+    #!/usr/bin/perl
+
+    print 'Hi there!' . '\n';
+    """
+}
+
+process pythonStuff {
+    """
+    #!/usr/bin/python
+
+    x = 'Hello'
+    y = 'world!'
+    print "%s - %s" % (x,y)
+    """
+}
+```
+
 ### Conditional Scripts
+
+Complex process scripts may need to evaluate conditions on the input parameters or use traditional flow control statements (i.e. `if`, `switch`, etc) in order to execute specific script commands, depending on the current inputs configuration.
+
+Process scripts can contain conditional statements by simply prefixing the script block with the keyword script:. By doing that the interpreter will evaluate all the following statements as a code block that must return the script string to be executed. It's much easier to use than to explain, for example:
+
+```
+seq_to_align = ...
+mode = 'tcoffee'
+
+process align {
+    input:
+    file seq_to_aln from sequences
+
+    script:
+    if( mode == 'tcoffee' )
+        """
+        t_coffee -in $seq_to_aln > out_file
+        """
+
+    else if( mode == 'mafft' )
+        """
+        mafft --anysymbol --parttree --quiet $seq_to_aln > out_file
+        """
+
+    else if( mode == 'clustalo' )
+        """
+        clustalo -i $seq_to_aln -o out_file
+        """
+
+    else
+        error "Invalid alignment mode: ${mode}"
+}
+```
+In the above example the process will execute the script fragment depending on the value of the mode parameter. By default it will execute the `tcoffee` command, changing the mode variable to `mafft` or `clustalo value, the other branches will be executed.
 
 ### Template
 
+The Process script can be externalised by using template files which can be reused across different processes and tested independently from the overall pipeline execution.
+
+A template is simply a shell script file that Nextflow is able to execute by using the template function as shown below:
+
+```
+process template_example {
+    input:
+    val STR from 'this', 'that'
+
+    script:
+    template 'my_script.sh'
+}
+```
+Nextflow looks for the `my_script.sh` template file in the directory templates that must exist in the same folder where the Nextflow script file is located (any other location can be provided by using an absolute template path).
+
+**NOTE:** When using [DSL2](https://www.nextflow.io/docs/latest/dsl2.html#dsl2-page), Nextflow also looks in the `templates` directory located in the same folder as module. See [module templates]().
+
 ### Shell
 
+The `shell` block is a string statement that defines the *shell* command executed by the process to carry out its task. It is an alternative to the [Script](https://www.nextflow.io/docs/latest/process.html#process-script) definition with an important difference, it uses the exclamation mark `!` character as the variable placeholder for Nextflow variables in place of the usual dollar character.
+
+In this way it is possible to use both Nextflow and Bash variables in the same piece of code without having to escape the latter and making process scripts more readable and easy to maintain. For example:
+
+```
+process myTask {
+  input:
+  val str
+
+  shell:
+  '''
+  echo User $USER says !{str}
+  '''
+}
+
+workflow {
+  greetings_ch = Channel.of('Hello', 'Hola', 'Bonjour')
+  myTask(greetins_ch).view()
+}
+```
+
+In the above example the `$USER` variable is managed by the Bash interpreter, while `!{str}` is handled as a process input variable managed by Nextflow.
+
+**NOTE**
+
+* Shell script definitions require the use of single-quote `'` delimited strings. When using double-quote `"` delimited strings, dollar variables are interpreted as Nextflow variables as usual. See [String interpolation](https://www.nextflow.io/docs/latest/script.html#string-interpolation).
+* Variables prefixed with `!` must always be enclosed in curly brackets, i.e. `!{str}` is a valid variable whereas `!str` is ignored.
+* Shell scripts support the use of the file [Template](https://www.nextflow.io/docs/latest/process.html#process-template) mechanism. The same rules are applied to the variables defined in the script template.
+
 ### Native Execution
+
+Nextflow processes can execute native code other than system scripts as shown in the previous paragraphs.
+
+This means that instead of specifying the process command to be executed as a string script, you can define it by providing one or more language statements, as you would do in the rest of the pipeline script. Simply starting the script definition block with the `exec:` keyword, for example:
+
+```
+x = Channel.from( 'a', 'b', 'c')
+
+process simpleSum {
+    input:
+    val x
+
+    exec:
+    println "Hello Mr. $x"
+}
+```
+
+will display:
+
+```
+Hello Mr. b
+Hello Mr. a
+Hello Mr. c
+```
 
 ## Stub
 
