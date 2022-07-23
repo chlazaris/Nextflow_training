@@ -241,6 +241,36 @@ Hello Mr. c
 
 ## Stub
 
+**WARNING:** This feature is experimental. It may change in future versions.
+
+As of version 20.11.0-edge it's possible to define a command stub that replaces the actual process command, when the `-stub-run` or `-stub` command line option.
+
+```
+process INDEX {
+  input:
+    path transcriptome
+
+  output:
+    path 'index'
+
+  script:
+    """
+    salmon index --threads $task.cpus -t $transcriptome -i index
+    """
+
+  stub:
+    """
+    mkdir index
+    touch index/seq.bin
+    touch index/info.json
+    touch index/refseq.bin
+    """
+}
+```
+This feature is meant to allow the fast prototyping and test of the workflow logic without using the real commands. The developer can use it to provide a dummy command which is expected to mimic the execution of the real one in a quicker manner. This can also be used as an alternative for the `dry-run` feature.
+
+**TIP:** The `stub` block can be defined before or after the `script` block. When the pipeline is executed with the `-stub-run` option and a process's `stub` is not defined, the script block is executed.
+
 ## Inputs
 
 ## Outputs
