@@ -273,6 +273,125 @@ This feature is meant to allow the fast prototyping and test of the workflow log
 
 ## Inputs
 
+Nextflow processes are isolated from each other but can communicate between themselves sending values through channels.
+
+The `input` block defines from which channels the process expects to receive data. You can only define one input block at a time and it must contain one or more input declarations.
+
+The input block follows the syntax shown below:
+
+```
+input:
+  <input qualifier> <input name> [from <source channel>] [attributes]
+```
+
+An input definition starts with an input *qualifier* and the input name, followed by the keyword `from` and the actual channel over which inputs are received (this last part applies to DSL1). Finally some input optional attributes can be specified.
+
+**TIP:** When the input name is the same as the channel name, the `from` part of the declaration can be omitted.
+
+The input qualifier declares the type of data to be received. This information is used by Nextflow to apply the semantic rules associated to each qualifier and handle it properly depending on the target execution platform (grid, cloud, etc).
+
+The qualifiers available are the ones listed in the following table:
+
+| Qualifier   |  Semantic |
+|-------------|-----------|
+| val  | Lets you access the received input value by its name in the process script. |
+| env  | Lets you use the received value to set an environment variable named as the specified input name. |
+| file | Lets you handle the received value as a file, staging it properly in the execution context. |
+| path | Lets you handle the received value as a path, staging the file properly in the execution context. |
+| stdin| Lets you forward the received value to the process `stdin` special file. |
+| tuple| Lets you handle a group of input values having one of the above qualifiers. |
+| each | Lets you execute the process for each entry in the input collection. |
+
+### Input of generic values
+
+The `val` qualifier allows you to receive data of any type as input. It can be accessed in the process script by using the specified input name, as shown in the following example:
+
+```
+nextflow.enable.dsl=2
+
+process basicExample {
+  input:
+  val x
+
+  output:
+  stdout
+
+  shell:
+  """
+  echo process job !{x}
+  """
+}
+
+workflow {
+  num = Channel.of(1, 2, 3)
+  basicExample(num).view()
+}
+```
+In the above example the process is executed three times, each time a value is received from the channel `num` and used to process the script. Thus, it results in an output similar to the one shown below:
+
+```
+process job 3
+process job 1
+process job 2
+```
+**NOTE:** The *channel* guarantees that items are delivered in the same order as they were received - but - since the process is executed in a parallel manner, there is no guarantee that they are processed in the same order as they are received. In fact, in the above example, the value `3` is processed before the others.
+
+### Input of files
+
+The `file` qualifier allows the handling of file values in the process execution context. This means that Nextflow will stage it in the process execution directory, and it can be access in the script by using the name specified in the input declaration. For example:
+
+```
+nextflow.enable.dsl=2
+
+process blastThemAll {
+  input:
+  path proteins
+
+  shell:
+  """
+  blastp -query !{proteins} -db nr
+  """
+}
+
+workflow {
+  proteins = Channel.fromPath('/some/path/*.fa')
+  blastThemAll(proteins)
+}
+```
+
+In the above example all the files ending with the suffix `.fa` are sent over the channel proteins. Then, these files are received by the process which will execute a *BLAST* query on each of them.
+
+There may be cases where your task needs to use a file whose name is fixed, it does not have to change along with the actual provided file. In this case you can specify its name by specifying the `name` attribute in the input file parameter declaration, as shown in the following example:
+
+```
+input:
+    path query_file name 'query.fa' from proteins
+```
+
+Or alternatively using a shorter syntax:
+
+```
+input:
+    path 'query.fa' from proteins
+```
+
+Using this, the previous example can be re-written as shown below:
+
+```
+proteins = Channel.fromPath( '/some/path/*.fa' )
+
+process blastThemAll {
+  input:
+  path 'query.fa' from proteins
+
+  "blastp -query query.fa -db nr"
+}
+```
+
+What happens in this example is that each file, that the process receives, is staged with the name `query.fa` in a different execution context (i.e. the folder where the job is executed) and an independent process execution is launched.
+
+**TIP:** This feature allows you to execute the process command multiple times without worrying about the file names changing. In other words, *Nextflow* helps you write pipeline tasks that are self-contained and decoupled from the execution environment. This is also the reason why you should avoid whenever possible using absolute or relative paths when referencing files in your pipeline processes.
+
 ## Outputs
 
 ## When
