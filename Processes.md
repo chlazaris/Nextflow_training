@@ -392,6 +392,79 @@ What happens in this example is that each file, that the process receives, is st
 
 **TIP:** This feature allows you to execute the process command multiple times without worrying about the file names changing. In other words, *Nextflow* helps you write pipeline tasks that are self-contained and decoupled from the execution environment. This is also the reason why you should avoid whenever possible using absolute or relative paths when referencing files in your pipeline processes.
 
+### Multiple input files
+
+A process can declare as input file a channel that emits a collection of values, instead of a simple value.
+
+In this case, the script variable defined by the input file parameter will hold a list of files. You can use it as shown before, referring to all the files in the list, or by accessing a specific entry using the usual square brackets notation.
+
+When a target file name is defined in the input parameter and a collection of files is received by the process, the file name will be appended by a numerical suffix representing its ordinal position in the list. For example:
+
+```
+#!/usr/bin/env nextflow
+
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process enumerateFasta {
+  input:
+  path "fasta_file"
+  
+  output:
+  stdout
+  
+  shell:
+  """
+  echo fasta_file*
+  """
+}
+
+workflow {
+    fasta_ch = Channel.fromPath("fasta/*.fa").buffer(size:3)
+    enumerateFasta(fasta_ch).view()
+}
+```
+will output:
+
+```
+fasta_file1 fasta_file2 fasta_file3
+
+fasta_file1 fasta_file2 fasta_file3
+
+fasta_file1 fasta_file2 fasta_file3
+...
+```
+
+The target input file name can contain the `*` and `?` wildcards, that can be used to control the name of staged files. The following table shows how the wildcards are replaced depending on the cardinality of the received input collection.
+
+| Cardinality  | Name pattern  | Staged file names  |
+|--------------|---------------|--------------------|
+| any   | `*`  | named as the source file  |
+| 1     | `file*.ext`  | `file.ext`  |
+| 1     | `file?.ext`  | `file1.ext`  |
+| 1     | `file??.ext`  | `file01.ext`  |
+| many  | `file*.ext`  | `file1.ext`, `file2.ext`, `file3.ext`  |
+| many  | `file?.ext`  | `file1.ext`, `file2.ext`, `file3.ext`  |
+| many  | `file??.ext`  | `file01.ext`, `file02.ext`, `file03.ext`  |
+| many  | `dir/*`  | named as the source file, created in `dir` subdirectory  |
+| many  | `dir??/*`  | named as the source file, created in a progressively indexed subdirectory e.g. `dir01/`, `dir02/`, etc.  |
+| many  | `dir*/*`  | as above  |
+
+The following fragment shows how a wildcard can be used in the input file declaration:
+
+```
+fasta = Channel.fromPath( "/some/path/*.fa" ).buffer(size:3)
+
+process blastThemAll {
+    input:
+    path 'seq?.fa' from fasta
+
+    "cat seq1.fa seq2.fa seq3.fa"
+}
+```
+
+**NOTE:** Rewriting input file names according to a named pattern is an extra feature and not at all obligatory. The normal file input constructs introduced in the [Input of files](https://www.nextflow.io/docs/latest/process.html#input-of-files) section are valid for collections of multiple files as well. To handle multiple input files preserving the original file names, use the `*` wildcard as name pattern or a variable identifier.
+
 ## Outputs
 
 ## When
