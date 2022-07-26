@@ -465,6 +465,202 @@ process blastThemAll {
 
 **NOTE:** Rewriting input file names according to a named pattern is an extra feature and not at all obligatory. The normal file input constructs introduced in the [Input of files](https://www.nextflow.io/docs/latest/process.html#input-of-files) section are valid for collections of multiple files as well. To handle multiple input files preserving the original file names, use the `*` wildcard as name pattern or a variable identifier.
 
+### Dynamic input file names
+
+When the input file `name` is specified by using the name file clause or the short string notation, you are allowed to use other input values as variables in the file name string. For example:
+
+```
+process simpleCount {
+  input:
+  val x from species
+  path "${x}.fa" from genomes
+
+  """
+  cat ${x}.fa | grep '>'
+  """
+}
+```
+
+In the above example, the input file name is set by using the current value of the `x` input value.
+
+This allows the input files to be staged in the script working directory with a name that is coherent with the current execution context.
+
+**TIP:** In most cases, you won’t need to use dynamic file names, because each process is executed in its own temporary directory, and input files are automatically staged into this directory by Nextflow. This guarantees that input files with the same name won’t overwrite each other.
+
+### Input of type 'path'
+
+The `path` input qualifier was introduced by Nextflow version 19.10.0 and it’s a drop-in replacement for the file qualifier, therefore it’s backward compatible with the syntax and the semantic for the input file described above.
+
+The important difference between file and path qualifier is that the first expects the values received as input to be file objects. When inputs is a different type, it automatically coverts to a string and saves it to a temporary file. This can be useful in some uses cases, but it turned out to be tricky in most common cases.
+
+The `path` qualifier instead interprets string values as the path location of the input file and automatically converts to a file object.
+
+```
+process foo {
+  input:
+    path x from '/some/data/file.txt'
+
+  """
+  your_command --in $x
+  """
+}
+```
+
+**NOTE:** The input value should represent an absolute path location, i.e. the string value must be prefixed with a `/` character or with a supported URI protocol (`file://`, `http://`, `s3://`, etc) and it cannot contain special characters (`\n`, etc).
+
+The option `stageAs` allows you to control how the file should be named in the task work directory, providing a specific name or a name pattern as described in the [Multiple input files](https://www.nextflow.io/docs/latest/process.html#multiple-input-files) section:
+
+```
+process foo {
+  input:
+    path x, stageAs: 'file.txt' from '/some/data/file.txt'
+
+  """
+  your_command --in $x
+  """
+}
+```
+
+**TIP:** The `path` qualifier should be preferred over `file` to handle process input files when using Nextflow 19.10.0 or later.
+
+### Input of type 'stdin'
+
+The `stdin` input qualifier allows you the forwarding of the value received from a channel to the standard input of the command executed by the process. For example:
+
+```
+nextflow.enable.dsl=2
+
+process printAll {
+  input:
+  stdin str
+
+  output:
+  stdout
+
+  shell:
+  """
+  cat -
+  """
+}
+
+workflow {
+  greetings_ch = Channel.of('hello','hola', 'bonjour', 'ciao').map{ it + '\n'}
+  printAll(greetings_ch).view()
+}
+```
+it will output:
+
+```
+hola
+bonjour
+ciao
+hello
+```
+
+### Input of type 'env'
+
+The `env` qualifier allows you to define an environment variable in the process execution context based on the value received from the channel. For example:
+
+```
+nextflow.enable.dsl=2
+
+process printEnv {
+  input:
+  env HELLO
+
+  output:
+  stdout
+
+  '''
+  echo $HELLO world!
+  '''
+}
+
+workflow {
+  str = Channel.of('hello', 'hola', 'bonjour', 'ciao')
+  printEnv(str).view()
+}
+```
+
+will output:
+
+```
+hello world!
+ciao world!
+bonjour world!
+hola world!
+```
+### Input of type 'tuple'
+
+The `tuple` qualifier allows you to group multiple parameters in a single parameter definition. It can be useful when a process receives, in input, tuples of values that need to be handled separately. Each element in the `tuple` is associated to a corresponding element with the tuple definition. For example:
+
+```
+values = Channel.of( [1, 'alpha'], [2, 'beta'], [3, 'delta'] )
+
+process tupleExample {
+    input:
+    tuple val(x), path('latin.txt') from values
+
+    """
+    echo Processing $x
+    cat - latin.txt > copy
+    """
+}
+```
+
+In the above example the `tuple` parameter is used to define the value `x` and the file `latin.txt`, which will receive a value from the same channel.
+
+In the `tuple` declaration items can be defined by using the following qualifiers: `val`, `env`, `path` and `stdin`.
+
+File names can be defined in *dynamic* manner as explained in the [Dynamic input file names](https://www.nextflow.io/docs/latest/process.html#dynamic-input-file-names) section.
+
+### Input repeaters
+
+The `each` qualifier allows you to repeat the execution of a process for each item in a collection, every time a new data is received. For example:
+
+```
+sequences = Channel.fromPath('*.fa')
+methods = ['regular', 'expresso', 'psicoffee']
+
+process alignSequences {
+  input:
+  path seq from sequences
+  each mode from methods
+
+  """
+  t_coffee -in $seq -mode $mode > result
+  """
+}
+```
+
+In the above example every time a file of sequences is received as input by the process, it executes three tasks running a T-coffee alignment with a different value for the `mode` parameter. This is useful when you need to *repeat* the same task for a given set of parameters.
+
+Input repeaters can be applied to files as well. For example:
+
+```
+sequences = Channel.fromPath('*.fa')
+methods = ['regular', 'expresso']
+libraries = [ file('PQ001.lib'), file('PQ002.lib'), file('PQ003.lib') ]
+
+process alignSequences {
+  input:
+  path seq from sequences
+  each mode from methods
+  each path(lib) from libraries
+
+  """
+  t_coffee -in $seq -mode $mode -lib $lib > result
+  """
+}
+```
+**NOTE:** When multiple repeaters are declared, the process is executed for each combination of them.
+
+In the latter example for any sequence input file emitted by the `sequences` channel are executed 6 alignments, 3 using the `regular` method against each library files, and other 3 by using the `expresso` method always against the same library files.
+
+**TIP:** If you need to repeat the execution of a process over an n-tuple of elements instead of simple values or files, create a channel combining the input values as needed to trigger the process execution multiple times. Refer to the [combine](https://www.nextflow.io/docs/latest/operator.html#operator-combine), [cross](https://www.nextflow.io/docs/latest/operator.html#operator-cross) and [phase](https://www.nextflow.io/docs/latest/operator.html#operator-phase) operators for more details.
+
+### Understand how multiple inputs work
+
 ## Outputs
 
 ## When
