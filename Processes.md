@@ -661,6 +661,86 @@ In the latter example for any sequence input file emitted by the `sequences` cha
 
 ### Understand how multiple inputs work
 
+A key feature of processes is the ability to handle inputs from multiple channels.
+
+When two or more channels are declared as process inputs, the process stops until there’s a complete input configuration ie. it receives an input value from all the channels declared as input.
+
+When this condition is verified, it consumes the input values coming from the respective channels, and spawns a task execution, then repeat the same logic until one or more channels have no more content.
+
+This means channel values are consumed serially one after another and the first empty channel cause the process execution to stop even if there are other values in other channels.
+
+For example:
+
+```
+nextflow.enable.dsl=2
+
+process foo {
+  input:
+  val x
+  val y
+
+  output:
+  stdout
+
+  script:
+  """
+  echo $x and $y
+  """
+}
+
+workflow {
+  ch1 = Channel.of(1, 2)
+  ch2 = Channel.of('a', 'b', 'c')
+  foo(ch1, ch2).view()
+}
+```
+
+The process `foo` is executed two times because the first input channel only provides two values and therefore the `c` element is discarded. It prints:
+
+```
+1 and a
+2 and b
+```
+
+A different semantic is applied when using a *value channel* (a.k.a. *singleton channel*). This kind of channel is created by the [Channel.value](https://nextflow.io/docs/latest/channel.html#channel-value) factory method or implicitly when a process input specifies a simple value in the `from` clause. By definition, a value channel is bound to a single value and it can be read an unlimited number of times without consuming its content.
+
+These properties make that when mixing a value channel with one or more (queue) channels, it does not affect the process termination because its content is applied repeatedly.
+
+To better understand this behavior, compare the previous example with the following one:
+
+```
+nextflow.enable.dsl=2
+
+process bar {
+  input:
+  val x
+  val y
+
+  output:
+  stdout
+
+  script:
+  """
+  echo $x and $y
+  """
+}
+
+workflow {
+  ch1 = Channel.value(1)
+  ch2 = Channel.of('a', 'b', 'c')
+  bar(ch1, ch2).view()
+}
+```
+
+The above snippet executes the `bar` process three times because the first input is a value channel, therefore its content can be read as many times as needed. The process termination is determined by the content of the second channel. It prints:
+
+```
+1 and a
+1 and b
+1 and c
+```
+
+See also: [Channel types](https://nextflow.io/docs/latest/channel.html#channel-types).
 ## Outputs
 
 ## When
