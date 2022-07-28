@@ -743,6 +743,96 @@ The above snippet executes the `bar` process three times because the first input
 See also: [Channel types](https://nextflow.io/docs/latest/channel.html#channel-types).
 ## Outputs
 
+The `output` declaration block allows you to define the channels used by the process to send out the results produced. You can only define one output block at a time and it must contain one or more output declarations.
+
+The output block follows the syntax shown below:
+
+```
+output:
+  <output qualifier> <output name> [into <target channel>[,channel,..]] [attribute [,..]]
+```
+
+Output definitions start by an output qualifier and the output name, followed by the keyword `into` and one or more channels over which outputs are sent (the latter part is not necessary in DSL2). Finally some optional attributes can be specified.
+
+**TIP:** When the output name is the same as the channel name, the into part of the declaration can be omitted.
+
+**NOTE:** If an output channel has not been previously declared in the pipeline script, it will be implicitly created by the output declaration itself.
+
+The qualifiers that can be used in the output declaration block are the ones listed in the following table:
+
+| Qualifier  | Semantic |
+|------------|----------|
+| val  | Sends variables with the name specified over the output channel. |
+| file | Sends a file produced by the process with the name specified over the output channel. |
+| path | Sends a file produced by the process with the name specified over the output channel (replaces file). |
+| env  | Sends the variable defined in the process environment with the name specified over the output channel. |
+| stdout | Sends the executed process `stdout` over the output channel. |
+| tuple | Sends multiple values over the same output channel. |
+
+### Output values
+
+The `val` qualifier allows you to output a value defined in the script context. In a common usage scenario, this is a value which has been defined in the input declaration block, as shown in the following example:
+
+```
+#!/usr/bin/env nextflow
+
+nextflow.enable.dsl=2
+
+process foo {
+    input:
+    val x
+
+    script:
+    """
+    echo $x > file."$x".txt
+    """
+}
+
+workflow {
+    methods = ['prot', 'dna', 'rna']
+    method_ch = Channel.from(methods)
+    method_ch.view{"Received: $it"}
+    foo(method_ch)
+}
+```
+
+Valid output values are value literals, input value identifiers, variables accessible in the process scope and value expressions. For example:
+
+```
+process foo {
+  input:
+  path fasta from 'dummy'
+
+  output:
+  val x into var_channel
+  val 'BB11' into str_channel
+  val "${fasta.baseName}.out" into exp_channel
+
+  script:
+  x = fasta.name
+  """
+  cat $x > file
+  """
+}
+```
+
+### Output files
+
+### Multiple output files
+
+### Dynamic output file names
+
+### Output path
+
+### Output 'stdout' special file
+
+### Output 'env'
+
+### Output 'tuple' of values
+
+### Optional output
+
+
 ## When
 
 ## Directives
