@@ -909,15 +909,141 @@ Read more about glob syntax at the following link: [What is a glob?](http://docs
 
 ### Output path
 
+The `path` output qualifier was introduced by Nextflow version 19.10.0 and it’s a drop-in replacement for the `file` output qualifier, therefore it’s backward compatible with the syntax and the semantic for the input `file` described above.
+
+The main advantage of `path` over the `file` qualifier is that it allows the specification of a number of options to fine-control the output files.
+
+| Name  | Description |
+|---|---|
+| glob  | When `true` the specified name is interpreted as a glob pattern (default: `true`) |
+| hidden  | When `true` hidden files are included in the matching output files (default: `false`)  |
+| followLinks  | When `true` target files are returned in place of any matching symlink (default: `true`) |
+| type  | Type of paths returned, either `file`, `dir` or `any` (default: `any`, or `file` if the specified file name pattern contains a `**` - double star - symbol)  |
+| maxDepth  | Maximum number of directory levels to visit (default: *no limit*)  |
+| includeInputs  | When `true` any input files matching an output file glob pattern are included. |
+
+**WARNING:** The `file` qualifier interprets `:` as a path separator, therefore `file 'foo:bar'` captures two files named `foo` and `bar`. The `path` qualifier, on the other hand, does not, so the output definition `path 'foo:bar'` captures a single file named `foo:bar`.
+
+**TIP:** The `path` qualifier should be preferred over `file` to handle process output files when using Nextflow 19.10.0 or later.
+
 ### Output 'stdout' special file
+
+The `stdout` qualifier allows you to capture the stdout output of the executed process. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process sayHello {
+
+  output:
+  stdout
+
+  script:
+  """
+  echo Hello world!
+  """
+}
+
+workflow {
+  sayHello().view()
+}
+```
+
 
 ### Output 'env'
 
+The `env` qualifier allows you to capture a variable defined in the process execution environment and send it over the channel specified in the output parameter declaration:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process myTask {
+    output:
+    env FOO
+
+    script:
+    '''
+    FOO=$(ls -la)
+    '''
+}
+
+workflow {
+  myTask().view{"directory content: $it"}
+}
+```
+
 ### Output 'tuple' of values
+
+The `tuple` qualifier allows you to send multiple values into a single channel. This feature is useful when you need to group together the results of multiple executions of the same process, as shown in the following example:
+
+```
+process blast {
+  input:
+  val species
+  path query
+
+  output:
+  tuple val(species), path('result')
+
+  script:
+  """
+  blast -db nr -query $query > result
+  """
+}
+
+workflow {
+  query_ch = Channel.fromPath('*.fa')
+  species_ch = Channel.from('human', 'cow', 'horse')
+  blast(species, query)
+}
+```
+
+In the above example a `blast` task is executed for each pair of species and query that are received. When the task completes a new tuple containing the value for `species` and the file `result` is generated.
+
+A `tuple` declaration can contain any combination of the following qualifiers, previously described: `val`, `path`, `env` and `stdout`.
+
+File names can be defined in a dynamic manner as explained in the [Dynamic output file names](https://nextflow.io/docs/latest/process.html#process-dynoutname) section.
 
 ### Optional output
 
+In most cases a process is expected to generate output that is added to the output channel. However, there are situations where it is valid for a process to not generate output. In these cases `optional true` may be added to the output declaration, which tells Nextflow not to fail the process if the declared output is not created.
+
+```
+output:
+    path("output.txt") optional true
+```
+
+In this example, the process is normally expected to generate an `output.txt` file, but in the cases where the file is legitimately missing, the process does not fail. The output channel is only populated by those processes that do generate `output.txt`.
 
 ## When
+
+The`when` declaration allows you to define a condition that must be verified in order to execute the process. This can be any expression that evaluates a boolean value.
+
+It is useful to enable/disable the process execution depending on the state of various inputs and parameters. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process find {
+  input:
+  path proteins
+  val type
+
+  when:
+  proteins.name =~ /^BB11.*/ && type == 'nr'
+
+  script:
+  """
+  blastp -query $proteins -db nr
+  """
+}
+
+workflow {
+  find()
+}
+```
 
 ## Directives
