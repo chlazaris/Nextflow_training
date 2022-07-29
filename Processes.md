@@ -818,9 +818,94 @@ process foo {
 
 ### Output files
 
-### Multiple output files
+The `file` qualifier allows you to output one or more files, produced by the process, over the specified channel. Now, the `path` qualifier should be used instead of `file`. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process randomNum {
+  output:
+  path 'result.txt'
+
+  '''
+  echo $RANDOM > result.txt
+  '''
+}
+
+workflow {
+    randomNum()
+}
+```
+
+In the above example the process, when executed, creates a file named `result.txt` containing a random number.
 
 ### Dynamic output file names
+
+When an output file name contains a `*` or `?` wildcard character it is interpreted as a [glob](http://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) path matcher. This allows you to *capture* multiple files into a list object and output them as a sole emission. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process splitLetters {
+    output:
+    path 'chunk_*'
+
+    '''
+    printf 'Hola' | split -b 1 - chunk_
+    '''
+}
+
+workflow {
+  splitLetters()
+    .flatMap()
+    .subscribe{println "File: ${it.name} => ${it.text}"}
+}
+```
+
+which prints:
+
+```
+File: chunk_aa => H
+File: chunk_ab => o
+File: chunk_ac => l
+File: chunk_ad => a
+```
+
+**NOTE:** In the above example, the operator [flatMap](https://nextflow.io/docs/latest/operator.html#operator-flatmap) is used to transform the list of files emitted by the letters channel into a channel that emits each file object separately.
+
+Some caveats on glob pattern behavior:
+
+* Input files are not included (unless `includeInputs` is `true`)
+* Directories are included, unless the `**` pattern is used to recurse through directories
+  
+**WARNING:** Although the input files matching a glob output declaration are not included in the resulting output channel, these files may still be transferred from the task scratch directory to the original task work directory. Therefore, to avoid unnecessary file copies, avoid using loose wildcards when defining output files, e.g. `file '*'`. Instead, use a prefix or a suffix to restrict the set of matching files to only the expected ones, e.g. file `'prefix_*.sorted.bam'`.
+
+By default all the files matching the specified glob pattern are emitted by the channel as a sole (list) item. It is also possible to emit each file as a sole item by adding the `mode flatten` attribute in the output file declaration.
+
+By using the `mode` attribute the previous example can be re-written as shown below:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process splitLetters {
+    output:
+    path 'chunk_*'
+
+    '''
+    printf 'Hola' | split -b 1 - chunk_
+    '''
+}
+
+workflow {
+  splitLetters()
+    .flatten()
+    .subscribe{println "File: ${it.name} => ${it.text}"}
+}
+```
+Read more about glob syntax at the following link: [What is a glob?](http://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)
 
 ### Output path
 
