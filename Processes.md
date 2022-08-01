@@ -661,8 +661,389 @@ In the latter example for any sequence input file emitted by the `sequences` cha
 
 ### Understand how multiple inputs work
 
+A key feature of processes is the ability to handle inputs from multiple channels.
+
+When two or more channels are declared as process inputs, the process stops until there’s a complete input configuration ie. it receives an input value from all the channels declared as input.
+
+When this condition is verified, it consumes the input values coming from the respective channels, and spawns a task execution, then repeat the same logic until one or more channels have no more content.
+
+This means channel values are consumed serially one after another and the first empty channel cause the process execution to stop even if there are other values in other channels.
+
+For example:
+
+```
+nextflow.enable.dsl=2
+
+process foo {
+  input:
+  val x
+  val y
+
+  output:
+  stdout
+
+  script:
+  """
+  echo $x and $y
+  """
+}
+
+workflow {
+  ch1 = Channel.of(1, 2)
+  ch2 = Channel.of('a', 'b', 'c')
+  foo(ch1, ch2).view()
+}
+```
+
+The process `foo` is executed two times because the first input channel only provides two values and therefore the `c` element is discarded. It prints:
+
+```
+1 and a
+2 and b
+```
+
+A different semantic is applied when using a *value channel* (a.k.a. *singleton channel*). This kind of channel is created by the [Channel.value](https://nextflow.io/docs/latest/channel.html#channel-value) factory method or implicitly when a process input specifies a simple value in the `from` clause. By definition, a value channel is bound to a single value and it can be read an unlimited number of times without consuming its content.
+
+These properties make that when mixing a value channel with one or more (queue) channels, it does not affect the process termination because its content is applied repeatedly.
+
+To better understand this behavior, compare the previous example with the following one:
+
+```
+nextflow.enable.dsl=2
+
+process bar {
+  input:
+  val x
+  val y
+
+  output:
+  stdout
+
+  script:
+  """
+  echo $x and $y
+  """
+}
+
+workflow {
+  ch1 = Channel.value(1)
+  ch2 = Channel.of('a', 'b', 'c')
+  bar(ch1, ch2).view()
+}
+```
+
+The above snippet executes the `bar` process three times because the first input is a value channel, therefore its content can be read as many times as needed. The process termination is determined by the content of the second channel. It prints:
+
+```
+1 and a
+1 and b
+1 and c
+```
+
+See also: [Channel types](https://nextflow.io/docs/latest/channel.html#channel-types).
 ## Outputs
 
+The `output` declaration block allows you to define the channels used by the process to send out the results produced. You can only define one output block at a time and it must contain one or more output declarations.
+
+The output block follows the syntax shown below:
+
+```
+output:
+  <output qualifier> <output name> [into <target channel>[,channel,..]] [attribute [,..]]
+```
+
+Output definitions start by an output qualifier and the output name, followed by the keyword `into` and one or more channels over which outputs are sent (the latter part is not necessary in DSL2). Finally some optional attributes can be specified.
+
+**TIP:** When the output name is the same as the channel name, the into part of the declaration can be omitted.
+
+**NOTE:** If an output channel has not been previously declared in the pipeline script, it will be implicitly created by the output declaration itself.
+
+The qualifiers that can be used in the output declaration block are the ones listed in the following table:
+
+| Qualifier  | Semantic |
+|------------|----------|
+| val  | Sends variables with the name specified over the output channel. |
+| file | Sends a file produced by the process with the name specified over the output channel. |
+| path | Sends a file produced by the process with the name specified over the output channel (replaces file). |
+| env  | Sends the variable defined in the process environment with the name specified over the output channel. |
+| stdout | Sends the executed process `stdout` over the output channel. |
+| tuple | Sends multiple values over the same output channel. |
+
+### Output values
+
+The `val` qualifier allows you to output a value defined in the script context. In a common usage scenario, this is a value which has been defined in the input declaration block, as shown in the following example:
+
+```
+#!/usr/bin/env nextflow
+
+nextflow.enable.dsl=2
+
+process foo {
+    input:
+    val x
+
+    script:
+    """
+    echo $x > file."$x".txt
+    """
+}
+
+workflow {
+    methods = ['prot', 'dna', 'rna']
+    method_ch = Channel.from(methods)
+    method_ch.view{"Received: $it"}
+    foo(method_ch)
+}
+```
+
+Valid output values are value literals, input value identifiers, variables accessible in the process scope and value expressions. For example:
+
+```
+process foo {
+  input:
+  path fasta from 'dummy'
+
+  output:
+  val x into var_channel
+  val 'BB11' into str_channel
+  val "${fasta.baseName}.out" into exp_channel
+
+  script:
+  x = fasta.name
+  """
+  cat $x > file
+  """
+}
+```
+
+### Output files
+
+The `file` qualifier allows you to output one or more files, produced by the process, over the specified channel. Now, the `path` qualifier should be used instead of `file`. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process randomNum {
+  output:
+  path 'result.txt'
+
+  '''
+  echo $RANDOM > result.txt
+  '''
+}
+
+workflow {
+    randomNum()
+}
+```
+
+In the above example the process, when executed, creates a file named `result.txt` containing a random number.
+
+### Dynamic output file names
+
+When an output file name contains a `*` or `?` wildcard character it is interpreted as a [glob](http://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) path matcher. This allows you to *capture* multiple files into a list object and output them as a sole emission. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process splitLetters {
+    output:
+    path 'chunk_*'
+
+    '''
+    printf 'Hola' | split -b 1 - chunk_
+    '''
+}
+
+workflow {
+  splitLetters()
+    .flatMap()
+    .subscribe{println "File: ${it.name} => ${it.text}"}
+}
+```
+
+which prints:
+
+```
+File: chunk_aa => H
+File: chunk_ab => o
+File: chunk_ac => l
+File: chunk_ad => a
+```
+
+**NOTE:** In the above example, the operator [flatMap](https://nextflow.io/docs/latest/operator.html#operator-flatmap) is used to transform the list of files emitted by the letters channel into a channel that emits each file object separately.
+
+Some caveats on glob pattern behavior:
+
+* Input files are not included (unless `includeInputs` is `true`)
+* Directories are included, unless the `**` pattern is used to recurse through directories
+  
+**WARNING:** Although the input files matching a glob output declaration are not included in the resulting output channel, these files may still be transferred from the task scratch directory to the original task work directory. Therefore, to avoid unnecessary file copies, avoid using loose wildcards when defining output files, e.g. `file '*'`. Instead, use a prefix or a suffix to restrict the set of matching files to only the expected ones, e.g. file `'prefix_*.sorted.bam'`.
+
+By default all the files matching the specified glob pattern are emitted by the channel as a sole (list) item. It is also possible to emit each file as a sole item by adding the `mode flatten` attribute in the output file declaration.
+
+By using the `mode` attribute the previous example can be re-written as shown below:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process splitLetters {
+    output:
+    path 'chunk_*'
+
+    '''
+    printf 'Hola' | split -b 1 - chunk_
+    '''
+}
+
+workflow {
+  splitLetters()
+    .flatten()
+    .subscribe{println "File: ${it.name} => ${it.text}"}
+}
+```
+Read more about glob syntax at the following link: [What is a glob?](http://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob)
+
+### Output path
+
+The `path` output qualifier was introduced by Nextflow version 19.10.0 and it’s a drop-in replacement for the `file` output qualifier, therefore it’s backward compatible with the syntax and the semantic for the input `file` described above.
+
+The main advantage of `path` over the `file` qualifier is that it allows the specification of a number of options to fine-control the output files.
+
+| Name  | Description |
+|---|---|
+| glob  | When `true` the specified name is interpreted as a glob pattern (default: `true`) |
+| hidden  | When `true` hidden files are included in the matching output files (default: `false`)  |
+| followLinks  | When `true` target files are returned in place of any matching symlink (default: `true`) |
+| type  | Type of paths returned, either `file`, `dir` or `any` (default: `any`, or `file` if the specified file name pattern contains a `**` - double star - symbol)  |
+| maxDepth  | Maximum number of directory levels to visit (default: *no limit*)  |
+| includeInputs  | When `true` any input files matching an output file glob pattern are included. |
+
+**WARNING:** The `file` qualifier interprets `:` as a path separator, therefore `file 'foo:bar'` captures two files named `foo` and `bar`. The `path` qualifier, on the other hand, does not, so the output definition `path 'foo:bar'` captures a single file named `foo:bar`.
+
+**TIP:** The `path` qualifier should be preferred over `file` to handle process output files when using Nextflow 19.10.0 or later.
+
+### Output 'stdout' special file
+
+The `stdout` qualifier allows you to capture the stdout output of the executed process. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process sayHello {
+
+  output:
+  stdout
+
+  script:
+  """
+  echo Hello world!
+  """
+}
+
+workflow {
+  sayHello().view()
+}
+```
+
+
+### Output 'env'
+
+The `env` qualifier allows you to capture a variable defined in the process execution environment and send it over the channel specified in the output parameter declaration:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process myTask {
+    output:
+    env FOO
+
+    script:
+    '''
+    FOO=$(ls -la)
+    '''
+}
+
+workflow {
+  myTask().view{"directory content: $it"}
+}
+```
+
+### Output 'tuple' of values
+
+The `tuple` qualifier allows you to send multiple values into a single channel. This feature is useful when you need to group together the results of multiple executions of the same process, as shown in the following example:
+
+```
+process blast {
+  input:
+  val species
+  path query
+
+  output:
+  tuple val(species), path('result')
+
+  script:
+  """
+  blast -db nr -query $query > result
+  """
+}
+
+workflow {
+  query_ch = Channel.fromPath('*.fa')
+  species_ch = Channel.from('human', 'cow', 'horse')
+  blast(species, query)
+}
+```
+
+In the above example a `blast` task is executed for each pair of species and query that are received. When the task completes a new tuple containing the value for `species` and the file `result` is generated.
+
+A `tuple` declaration can contain any combination of the following qualifiers, previously described: `val`, `path`, `env` and `stdout`.
+
+File names can be defined in a dynamic manner as explained in the [Dynamic output file names](https://nextflow.io/docs/latest/process.html#process-dynoutname) section.
+
+### Optional output
+
+In most cases a process is expected to generate output that is added to the output channel. However, there are situations where it is valid for a process to not generate output. In these cases `optional true` may be added to the output declaration, which tells Nextflow not to fail the process if the declared output is not created.
+
+```
+output:
+    path("output.txt") optional true
+```
+
+In this example, the process is normally expected to generate an `output.txt` file, but in the cases where the file is legitimately missing, the process does not fail. The output channel is only populated by those processes that do generate `output.txt`.
+
 ## When
+
+The`when` declaration allows you to define a condition that must be verified in order to execute the process. This can be any expression that evaluates a boolean value.
+
+It is useful to enable/disable the process execution depending on the state of various inputs and parameters. For example:
+
+```
+// Enable DSL2
+nextflow.enable.dsl=2
+
+process find {
+  input:
+  path proteins
+  val type
+
+  when:
+  proteins.name =~ /^BB11.*/ && type == 'nr'
+
+  script:
+  """
+  blastp -query $proteins -db nr
+  """
+}
+
+workflow {
+  find()
+}
+```
 
 ## Directives
