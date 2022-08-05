@@ -157,8 +157,56 @@ myFileChannel = Channel.fromPath( '/data/big/*.txt' )
 
 This example creates a channel and emits as many `Path` items as there are files with `txt` extension in the `/data/big` folder.
 
+**TIP:** Two asterisks, i.e. `**`, works like `*` but crosses directory boundaries. This syntax is generally used for matching complete paths. Curly brackets specify a collection of sub-patterns.
 
+For example:
 
+```
+files = Channel.fromPath( 'data/**.fa' )
+moreFiles = Channel.fromPath( 'data/**/*.fa' )
+pairFiles = Channel.fromPath( 'data/file_{1,2}.fq' )
+```
+
+The first line returns a channel emitting the files ending with the suffix `.fa` in the data folder and recursively in all its sub-folders. While the second one only emits the files which have the same suffix in any sub-folder in the data path. Finally the last example emits two files: `data/file_1.fq` and `data/file_2.fq`.
+
+**NOTE:** As in Linux Bash, the `*` wildcard does not catch hidden files (i.e. files whose name starts with a `.` character).
+
+In order to include hidden files, you need to start your pattern with a period character or specify the `hidden: true` option. For example:
+
+```
+expl1 = Channel.fromPath( '/path/.*' )
+expl2 = Channel.fromPath( '/path/.*.fa' )
+expl3 = Channel.fromPath( '/path/*', hidden: true )
+```
+
+The first example returns all hidden files in the specified path. The second one returns all hidden files ending with the `.fa` suffix. Finally the last example returns all files (hidden and non-hidden) in that path.
+
+By default a [glob](http://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) pattern only looks for regular file paths that match the specified criteria, i.e. it won’t return directory paths.
+
+You may use the parameter `type` specifying the value `file`, `dir` or `any` in order to define what kind of paths you want. For example:
+
+```
+myFileChannel = Channel.fromPath( '/path/*b', type: 'dir' )
+myFileChannel = Channel.fromPath( '/path/a*', type: 'any' )
+```
+
+The first example will return all *directory* paths ending with the `b` suffix, while the second will return any file and directory starting with a `a` prefix.
+
+|Name|Description|
+|----|-----------|
+|glob | When `true` interprets characters `*`, `?`, `[]` and `{}` as glob wildcards, otherwise handles them as normal characters (default: `true`)|
+|type | Type of paths returned, either `file`, `dir` or `any` (default: `file`)|
+|hidden | When true includes hidden files in the resulting paths (default: `false`)|
+|maxDepth | Maximum number of directory levels to visit (default: *no limit*) |
+|followLinks | When `true` it follows symbolic links during directories tree traversal, otherwise they are managed as files (default: `true`) |
+|relative | When `true` returned paths are relative to the top-most common directory (default: `false`) |
+|checkIfExists | When `true` throws an exception of the specified path do not exist in the file system (default: `false`) |
+
+**NOTE:** Multiple paths or glob patterns can be specified using a list:
+
+```
+Channel.fromPath( ['/some/path/*.fq', '/other/path/*.fastq'] )
+```
 
 ### fromFilePairs
 
