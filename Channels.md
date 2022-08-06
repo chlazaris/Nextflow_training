@@ -210,6 +210,53 @@ Channel.fromPath( ['/some/path/*.fq', '/other/path/*.fastq'] )
 
 ### fromFilePairs
 
+The `fromFilePairs` method creates a channel emitting the file pairs matching a [glob](http://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) pattern provided by the user. The matching files are emitted as tuples in which the first element is the grouping key of the matching pair and the second element is the list of files (sorted in lexicographical order). For example:
+
+```
+Channel
+    .fromFilePairs('/my/data/SRR*_{1,2}.fastq')
+    .view()
+```
+
+will produce an output similar to the following:
+
+```
+[SRR493366, [/my/data/SRR493366_1.fastq, /my/data/SRR493366_2.fastq]]
+[SRR493367, [/my/data/SRR493367_1.fastq, /my/data/SRR493367_2.fastq]]
+[SRR493368, [/my/data/SRR493368_1.fastq, /my/data/SRR493368_2.fastq]]
+[SRR493369, [/my/data/SRR493369_1.fastq, /my/data/SRR493369_2.fastq]]
+[SRR493370, [/my/data/SRR493370_1.fastq, /my/data/SRR493370_2.fastq]]
+[SRR493371, [/my/data/SRR493371_1.fastq, /my/data/SRR493371_2.fastq]]
+```
+
+**NOTE:** The glob pattern must contain at least one `*` wildcard character.
+
+Alternatively it is possible to implement a custom file pair grouping strategy providing a closure which, given the current file as parameter, returns the grouping key. For example:
+
+```
+Channel
+    .fromFilePairs('/some/data/*', size: -1) { file -> file.extension }
+    .view { ext, files -> "Files with the extension $ext are $files" }
+```
+
+Table of optional parameters available:
+
+|Name|Description|
+|----|-----------|
+|type|Type of paths returned, either file, dir or any (default: file)|
+|hidden|When `true` includes hidden files in the resulting paths (default: `false`)|
+|maxDepth|Maximum number of directory levels to visit (default: no *limit*)|
+|followLinks|When `true` it follows symbolic links during directories tree traversal, otherwise they are managed as files (default: `true`)|
+|size|Defines the number of files each emitted item is expected to hold (default: 2). Set to `-1` for any.|
+|flat|When `true` the matching files are produced as sole elements in the emitted tuples (default: `false`).|
+|checkIfExists|When `true` throws an exception of the specified path do not exist in the file system (default: `false`)|
+
+**NOTE:** Multiple glob patterns can be specified using a list:
+
+```
+Channel.fromFilePairs( ['/some/data/SRR*_{1,2}.fastq', '/other/data/QFF*_{1,2}.fastq'] )
+```
+
 ### fromSRA
 
 ### of
