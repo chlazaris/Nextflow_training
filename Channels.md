@@ -261,6 +261,48 @@ Channel.fromFilePairs( ['/some/data/SRR*_{1,2}.fastq', '/other/data/QFF*_{1,2}.f
 
 ### of
 
+The `of` method allows you to create a channel emitting any sequence of values that are specified as the method argument. For example:
+
+```
+ch = Channel.of{1, 2, 3, 4}
+ch.view{"value: $it"}
+```
+
+The first line in this example creates a variable `ch` which holds a channel object. This channel emits the values specified as a parameter in the `of` method. Thus, the second line prints the following:
+
+```
+value: 1
+value: 3
+value: 5
+value: 7
+```
+
+Ranges of values are expanded accordingly:
+
+```
+ch = Channel
+    .of(1..22,'X','Y')
+    .view()
+```
+
+This prints:
+
+```
+1
+2
+3
+.
+.
+.
+22
+X
+Y
+```
+
+**NOTE** This feature requires Nextflow version 19.10.0 or later.
+
+See also: [fromList](https://www.nextflow.io/docs/latest/channel.html#fromlist) factory method.
+
 ### value
 
 The `value` factory method is used to create a value channel. An optional not `null` argument can be specified to bind the channel to a specific value. For example:
@@ -274,6 +316,36 @@ expl3 = Channel.value( [1,2,3,4,5] )
 The first line in the example creates an ‘empty’ variable. The second line creates a channel and binds a string to it. Finally, the last one creates a channel and binds a list object to it that will be emitted as a sole emission.
 
 ### watchPath
+
+The `watchPath` method watches a folder for one or more files matching a specified pattern. As soon as there is a file that meets the specified condition, it is emitted over the channel that is returned by the `watchPath` method. The condition on files to watch can be specified by using `*` or `?` wildcard characters i.e. by specifying a [glob](http://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) path matching criteria.
+
+For example:
+
+```
+Channel
+    .watchPath('/path/*.fa')
+    .subscribe{println "Fasta file: $it"}
+```
+
+By default it watches only for new files created in the specified folder. Optionally, it is possible to provide a second argument that specifies what event(s) to watch. The supported events are:
+
+|Name|Description|
+|----|-----------|
+|`create`| A new file is created (default)|
+|`modify`| A file is modified|
+|`delete`| A file is deleted|
+
+You can specify more than one of these events by using a comma separated string as shown below:
+
+```
+Channel
+    .watchPath( '/path/*.fa', 'create,modify' )
+    .subscribe { println "File created or modified: $it" }
+```
+
+**WARNING:** The `watchPath` factory waits endlessly for files that match the specified pattern and event(s), which means that it will cause your pipeline to run forever. Consider using the `until` operator to close the channel when a certain condition is met (e.g. receiving a file named `DONE`).
+
+See also: [fromPath](https://www.nextflow.io/docs/latest/channel.html#frompath) factory method.
 
 ### fromList
 
