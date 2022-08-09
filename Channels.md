@@ -259,6 +259,61 @@ Channel.fromFilePairs( ['/some/data/SRR*_{1,2}.fastq', '/other/data/QFF*_{1,2}.f
 
 ### fromSRA
 
+The `fromSRA` method queries the [NCBI SRA](https://www.ncbi.nlm.nih.gov/sra) database and returns a channel emitting the FASTQ files matching the specified criteria i.e. project or accession number(s). For example:
+
+```
+Channel
+    .fromSRA('SRP043510')
+    .view()
+```
+
+returns:
+
+```
+[SRR1448794, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR144/004/SRR1448794/SRR1448794.fastq.gz]
+[SRR1448795, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR144/005/SRR1448795/SRR1448795.fastq.gz]
+[SRR1448792, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR144/002/SRR1448792/SRR1448792.fastq.gz]
+[SRR1448793, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR144/003/SRR1448793/SRR1448793.fastq.gz]
+[SRR1910483, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR191/003/SRR1910483/SRR1910483.fastq.gz]
+[SRR1910482, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR191/002/SRR1910482/SRR1910482.fastq.gz]
+(remaining omitted)
+```
+
+Multiple accession IDs can be specified using a list object:
+
+```
+ids = ['ERR908507', 'ERR908506', 'ERR908505']
+Channel
+    .fromSRA(ids)
+    .view()
+```
+
+```
+[ERR908507, [ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR908/ERR908507/ERR908507_1.fastq.gz, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR908/ERR908507/ERR908507_2.fastq.gz]]
+[ERR908506, [ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR908/ERR908506/ERR908506_1.fastq.gz, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR908/ERR908506/ERR908506_2.fastq.gz]]
+[ERR908505, [ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR908/ERR908505/ERR908505_1.fastq.gz, ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR908/ERR908505/ERR908505_2.fastq.gz]]
+```
+
+**NOTE:** Each read pair is implicitly managed and returned as a list of files.
+
+**TIP:** This method uses the NCBI [ESearch](https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch) API behind the scenes, therefore it allows the use of any query term supported by this API.
+
+Table of optional parameters available:
+
+|Name|Description|
+|----|-----------|
+|apiKey|NCBI user API key|
+|cache|Enable/disable the caching API requests (default: `true`).|
+|max|Maximum number of entries that can be retried (default: unlimited) .|
+|protocol|Allow choosing the protocol for the resulting remote URLs. Available choices: `ftp`, `http`, `https` (default: `ftp`).|
+
+To access the NCBI search service the [NCBI API keys](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities) should be provided either:
+
+* Using the apiKey optional parameter e.g. `Channel.fromSRA(ids, apiKey:'0123456789abcdef')`.
+* Exporting the `NCBI_API_KEY` variable in your environment e.g. `export NCBI_API_KEY=0123456789abcdef`
+
+**NOTE:** This feature requires Nextflow version 19.04.0 or later.
+
 ### of
 
 The `of` method allows you to create a channel emitting any sequence of values that are specified as the method argument. For example:
@@ -372,5 +427,87 @@ See also: [of](https://www.nextflow.io/docs/latest/channel.html#of) factory meth
 
 ## Binding values
 
+Since in *Nextflow* channels are implemented using dataflow variables or queues. Thus sending a message is equivalent to *bind* a value to an object representing the communication channel.
+
+### bind
+
+Channel objects provide a *bind()* method which is the basic operation to send a message over the channel. For example:
+
+```
+myChannel = Channel.create()
+myChannel.bind( 'Hello world' )
+```
+
+### operator <<
+
+The operator `<<` is just a syntax sugar for the `bind` method. Thus, the following example produce an identical result as the previous one:
+
+```
+myChannel = Channel.create()
+myChannel << 'Hello world'
+```
+
 ## Observing events
 
+### subscribe
+
+The `subscribe` method allows you to execute a user defined function each time a new value is emitted by the source channel.
+
+The emitted value is passed implicitly to the specified function. For example:
+
+```
+// define a channel emitting three values
+source = Channel.from ( 'alpha', 'beta', 'delta' )
+
+// subscribe a function to the channel printing the emitted values
+source.subscribe {  println "Got: $it"  }
+```
+
+```
+Got: alpha
+Got: beta
+Got: delta
+```
+
+**NOTE:** In Groovy, the language on which Nextflow is based, the user defined function is called a “closure”.
+
+If needed the closure parameter can be defined explicitly, using a name other than it and, optionally, specifying the expected value type, as shown in the following example:
+
+```
+Channel
+    .from( 'alpha', 'beta', 'lambda' )
+    .subscribe { String str ->
+        println "Got: ${str}; len: ${str.size()}"
+    }
+```
+
+```
+Got: alpha; len: 5
+Got: beta; len: 4
+Got: lambda; len: 6
+```
+
+Read [Closures](https://www.nextflow.io/docs/latest/script.html#script-closure) paragraph to learn more about closure feature.
+
+### onNext, onComplete, onError
+
+The `subscribe` method may accept one or more of the following event handlers:
+
+* `onNext`: registers a function that is invoked whenever the channel emits a value. This is the *same* as using the subscribe with a *plain* closure as describe in the examples above.
+* `onComplete`: registers a function that is invoked after the *last* value is emitted by the channel.
+* `onError`: registers a function that is invoked when an exception is raised while handling the `onNext` event. It will not make further calls to `onNext` or `onComplete`. The `onError` method takes as its parameter the `Throwable` that caused the error.
+
+For example:
+
+```
+Channel
+    .from( 1, 2, 3 )
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+```
+1
+2
+3
+Done
+```
