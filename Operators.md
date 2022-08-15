@@ -80,17 +80,185 @@ Channel
 
 ### unique
 
+The `unique` operator allows you to remove duplicate items from a channel and only emit single items with no repetition.
+
+For example:
+
+```
+Channel
+    .from(1, 1, 1, 5, 7, 7, 7, 3, 3)
+    .unique()
+    .view()
+```
+
+```
+1
+5
+7
+3
+```
+
+You can also specify an optional [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) that customizes the way it distinguishes between unique items. For example:
+
+```
+Channel
+    .from(1, 2, 3, 5)
+    .unique{ it % 2 }
+    .view()
+```
+
+```
+1
+4
+```
+
 ### distinct
+
+The `distinct` operator allows you to remove *consecutive* duplicated items from a channel, so that each emitted item is different from the preceding one. For example:
+
+```
+Channel
+    .from(1,1,2,2,2,3,1,1,2,2,3)
+    .distinct()
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+```
+1
+2
+3
+1
+2
+3
+Done
+```
+
+You can also specify an optional [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) that customizes the way it distinguishes between distinct items. For example:
+
+```
+Channel
+    .from(1,1,2,2,2,3,1,1,2,4,6)
+    .distinct { it % 2 }
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+```
+1
+2
+3
+2
+Done
+```
 
 ### first
 
+The `first` operator creates a channel that returns the first item emitted by the source channel, or eventually the first item that matches an optional condition. The condition can be specified by using a [regular expression](https://www.nextflow.io/docs/latest/script.html#script-regexp), a Java *class* type or any boolean *predicate*. For example:
+
+```
+// no condition is specified, emits the very first item: 1
+Channel
+    .from( 1, 2, 3 )
+    .first()
+    .view()
+
+// emits the first String value: 'a'
+Channel
+    .from( 1, 2, 'a', 'b', 3 )
+    .first( String )
+    .view()
+
+// emits the first item matching the regular expression: 'aa'
+Channel
+    .from( 'a', 'aa', 'aaa' )
+    .first( ~/aa.*/ )
+    .view()
+
+// emits the first item for which the predicate evaluates to true: 4
+Channel
+    .from( 1,2,3,4,5 )
+    .first { it > 3 }
+    .view()
+```
+
 ### randomSample
+
+The `randomSample` operator allows you to create a channel emitting the specified number of items randomly taken from the channel to which is applied. For example:
+
+```
+Channel
+      .from( 1..100 )
+      .randomSample( 10 )
+      .view()
+```
+
+The above snippet will print 10 numbers in the range from 1 to 100.
+
+The operator supports a second parameter that allows you to set the initial seed for the random number generator. By setting it, the `randomSample` operator will always return the same pseudo-random sequence. For example:
+
+```
+Channel
+      .from( 1..100 )
+      .randomSample( 10, 234 )
+      .view()
+```
+
+The above example will print 10 random numbers in the range between 1 and 100. At each run of the script, the same sequence will be returned.
 
 ### take
 
+The `take` operator allows you to filter only the first *n* items emitted by a channel. For example:
+
+```
+Channel
+    .from( 1,2,3,4,5,6 )
+    .take( 3 )
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+```
+1
+2
+3
+Done
+```
+
+**TIP:** Specifying a size of `-1` causes the operator to take all values.
+
+See also [until](https://www.nextflow.io/docs/latest/operator.html#until).
+
 ### last
 
+The `last` operator creates a channel that only returns the last item emitted by the source channel. For example:
+
+```
+Channel
+    .from(1, 2, 3, 4, 5, 6)
+    .last()
+    .view()
+```
+
+```
+6
+```
+
 ### until
+
+The `until` operator creates a channel that returns the items emitted by the source channel and stop when the condition specified is verified (that last value is NOT included). For example:
+
+```
+Channel
+    .from(3, 2, 1, 5, 1, 5)
+    .until{ it == 5 }
+    .view()
+```
+
+```
+3
+2
+1
+```
+
+See also [take](https://www.nextflow.io/docs/latest/operator.html#take).
 
 ## Transforming operators
 
