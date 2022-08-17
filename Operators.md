@@ -262,6 +262,163 @@ See also [take](https://www.nextflow.io/docs/latest/operator.html#take).
 
 ## Transforming operators
 
+Transforming operators are used to transform the items emitted by a channel to new values.
+
+These operators are:
+
+* [buffer](https://www.nextflow.io/docs/latest/operator.html#buffer)
+* [collate](https://www.nextflow.io/docs/latest/operator.html#collate)
+* [collect](https://www.nextflow.io/docs/latest/operator.html#collect)
+* [flatten](https://www.nextflow.io/docs/latest/operator.html#flatten)
+* [flatMap](https://www.nextflow.io/docs/latest/operator.html#flatmap)
+* [groupBy](https://www.nextflow.io/docs/latest/operator.html#groupby)
+* [groupTuple](https://www.nextflow.io/docs/latest/operator.html#grouptuple)
+* [map](https://www.nextflow.io/docs/latest/operator.html#map)
+* [reduce](https://www.nextflow.io/docs/latest/operator.html#reduce)
+* [toList](https://www.nextflow.io/docs/latest/operator.html#tolist)
+* [toSortedList](https://www.nextflow.io/docs/latest/operator.html#tosortedlist)
+* [transpose](https://www.nextflow.io/docs/latest/operator.html#transpose)
+
+### buffer
+
+The `buffer` operator gathers the items emitted by the source channel into subsets and emits these subsets separately.
+
+There are a number of ways you can regulate how `buffer` gathers the items from the source channel into subsets:
+
+* `buffer( closingCondition )`: starts to collect the items emitted by the channel into a subset until the closing condition is verified. After that the subset is emitted to the resulting channel and new items are gathered into a new subset. The process is repeated until the last value in the source channel is sent. The `closingCondition` can be specified either as a [regular expression](https://www.nextflow.io/docs/latest/script.html#script-regexp), a Java class, a literal value, or a *boolean predicate* that has to be satisfied. For example:
+
+```
+Channel
+    .from( 1,2,3,1,2,3 )
+    .buffer{ it==2 }
+    .view()
+
+// emitted values
+[1,2]
+[3,1,2]
+```
+
+* `buffer( openingCondition, closingCondition )`: starts to gather the items emitted by the channel as soon as one of the them verifies the *opening condition* and it continues until there is one item which verifies the *closing condition*. After that, the subset is emitted and it continues applying the described logic until the last channel item is emitted. Both conditions can be defined either as a [regular expression](https://www.nextflow.io/docs/latest/script.html#script-regexp), a literal value, a Java class, or a *boolean predicate* that need to be satisfied. For example:
+
+```
+Channel
+    .from( 1,2,3,4,5,1,2,3,4,5,1,2 )
+    .buffer( 2,4 )
+    .view()
+
+// emits bundles starting with '2' and ending with '4'
+[2,3,4]
+[2,3,4]
+```
+
+* `buffer( size: n )`: transforms the source channel in such a way that it emits tuples made up of `n` elements. An incomplete tuple is discarded. For example:
+
+```
+Channel
+    .from( 1,2,3,1,2,3,1 )
+    .buffer( size: 2 )
+    .view()
+
+// emitted values
+[1, 2]
+[3, 1]
+[2, 3]
+```
+
+If you want to emit the last items in a tuple containing less than `n` elements, simply add the parameter `remainder` specifying `true`, for example:
+
+```
+Channel
+    .from( 1,2,3,1,2,3,1 )
+    .buffer( size: 2, remainder: true )
+    .view()
+
+// emitted values
+[1, 2]
+[3, 1]
+[2, 3]
+[1]
+```
+
+* `buffer( size: n, skip: m )`: as in the previous example, it emits tuples containing `n` elements, but skips `m` values before starting to collect the values for the next tuple (including the first emission). For example:
+
+```
+Channel
+    .from( 1,2,3,4,5,1,2,3,4,5,1,2 )
+    .buffer( size:3, skip:2 )
+    .view()
+
+// emitted values
+[3, 4, 5]
+[3, 4, 5]
+```
+
+If you want to emit the remaining items in a tuple containing less than `n` elements, simply add the parameter `remainder` specifying `true`, as shown in the previous example.
+
+See also: [collate](https://www.nextflow.io/docs/latest/operator.html#collate) operator.
+
+### collate
+
+The `collate` operator transforms a channel in such a way that the emitted values are grouped in tuples containing n items. For example:
+
+```
+Channel
+    .from(1,2,3,1,2,3,1)
+    .collate( 3 )
+    .view()
+```
+
+emits:
+
+```
+[1, 2, 3]
+[1, 2, 3]
+[1]
+```
+
+As shown in the above example the last tuple may be incomplete e.g. contain fewer elements than the specified size. If you want to avoid this, specify `false` as the second parameter. For example:
+
+```
+Channel
+    .from(1,2,3,1,2,3,1)
+    .collate( 3, false )
+    .view()
+```
+
+emits:
+
+```
+[1, 2, 3]
+[1, 2, 3]
+```
+
+A second version of the `collate` operator allows you to specify, after the *size*, the *step* by which elements are collected in tuples. For example:
+
+```
+Channel
+    .from(1,2,3,4)
+    .collate( 3, 1 )
+    .view()
+```
+
+emits:
+
+```
+[1, 2, 3]
+[2, 3, 4]
+[3, 4]
+[4]
+```
+
+As before, if you don’t want to emit the last items which do not complete a tuple, specify `false` as the third parameter.
+
+See also: [buffer](https://www.nextflow.io/docs/latest/operator.html#buffer) operator.
+
+
+
+
+
+
 ## Splitting operators
 
 ## Combining operators
