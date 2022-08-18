@@ -414,11 +414,105 @@ As before, if you don’t want to emit the last items which do not complete a tu
 
 See also: [buffer](https://www.nextflow.io/docs/latest/operator.html#buffer) operator.
 
+### collect
 
+The `collect` operator collects all the items emitted by a channel to a `List` and returns the resulting object as a sole emission. For example:
 
+```
+Channel
+    .from( 1,2,3,4 )
+    .collect()
+    .view()
 
+# emits
+[1,2,3,4]
+```
 
+An optional [closure]() can be specified to transform each item before adding it to the resulting list. For example:
 
+```
+Channel
+    .from( 'hello','ciao','bonjour' )
+    .collect{ it.length() }
+    .view()
+
+# emits
+[5,4,7]
+```
+
+See also: [toList](https://www.nextflow.io/docs/latest/operator.html#tolist) and [toSortedList](https://www.nextflow.io/docs/latest/operator.html#tosortedlist) operator.
+
+### flatten
+
+The `flatten` operator transforms a channel in such a way that every item of type `Collection` or `Array` is flattened so that each single entry is emitted separately by the resulting channel. For example:
+
+```
+Channel
+    .from( [1,[2,3]], 4, [5,[6]] )
+    .flatten()
+    .view()
+```
+
+emits: 
+
+```
+1
+2
+3
+4
+5
+6
+```
+
+See also: `flatMap` operator
+### flatMap
+
+The `flatMap` operator applies a function of your choosing to every item emitted by a channel, and returns the items so obtained as a new channel. Whereas the mapping function returns a list of items, this list is flattened so that each single item is emitted on its own.
+
+For example:
+
+```
+// create a channel of numbers
+numbers = Channel.from( 1, 2, 3 )
+
+// map each number to a tuple (array), which items are emitted separately
+results = numbers.flatMap { n -> [ n*2, n*3 ] }
+
+// print the final results
+results.subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+emits:
+
+```
+2
+3
+4
+6
+6
+9
+Done
+```
+
+Associative arrays are handled in the same way, so that each array entry is emitted as a single key-value item. For example:
+
+```
+Channel
+    .from ( 1, 2, 3 )
+    .flatMap { it -> [ number: it, square: it*it ] }
+    .view { it.key + ': ' + it.value }
+```
+
+emits:
+
+```
+number: 1
+square: 1
+number: 2
+square: 4
+number: 3
+square: 9
+```
 ## Splitting operators
 
 ## Combining operators
