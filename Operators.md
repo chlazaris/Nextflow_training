@@ -513,6 +513,35 @@ square: 4
 number: 3
 square: 9
 ```
+
+### groupBy (legacy)
+
+**WARNING:** This operator is deprecated. Use the [groupTuple](https://www.nextflow.io/docs/latest/operator.html#grouptuple) operator instead.
+
+The `groupBy` operator collects the values emitted by the source channel and groups them together using a *mapping* function that associates each item with a key. When finished, it emits an associative array that maps each key to the set of items identified by that key.
+
+For example:
+
+```
+Channel
+    .from('hello', 'ciao', 'hola', 'hi', 'bonjour')
+    .groupBy { String str -> str[0] }
+    .view()
+```
+
+emits:
+
+```
+[ b:['bonjour'], c:['ciao'], h:['hello','hola','hi'] ]
+```
+
+The *mapping* function is an optional parameter. When omitted, the values are grouped according to these rules:
+
+* Any value of type `Map` is associated with the value of its first entry, or null when the map itself is empty.
+* Any value of type `Map.Entry` is associated with the value of its key attribute.
+* Any value of type `Collection` or `Array` is associated with its first entry.
+* For any other value, the value itself is used at the key.
+
 ## Splitting operators
 
 ## Combining operators
