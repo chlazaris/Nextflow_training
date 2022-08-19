@@ -542,6 +542,69 @@ The *mapping* function is an optional parameter. When omitted, the values are gr
 * Any value of type `Collection` or `Array` is associated with its first entry.
 * For any other value, the value itself is used at the key.
 
+### groupTuple
+
+The `groupTuple` operator collects tuples (or lists) of values emitted by the source channel grouping together the elements that share the same key. Finally it emits a new tuple object for each distinct key collected.
+
+In other words, the operator transforms a sequence of tuple like (*K, V, W, ..*) into a new channel emitting a sequence of (*K, list(V), list(W), ..*)
+
+For example:
+
+```
+Channel
+     .from( [1,'A'], [1,'B'], [2,'C'], [3, 'B'], [1,'C'], [2, 'A'], [3, 'D'] )
+     .groupTuple()
+     .view()
+```
+
+emits:
+
+```
+[1, [A, B, C]]
+[2, [C, A]]
+[3, [B, D]]
+```
+
+By default the first entry in the tuple is used as grouping key. A different key can be chosen by using the `by` parameter and specifying the index of the entry to be used as key (the index is zero-based). For example, grouping by the second value in each tuple:
+
+```
+Channel
+     .from( [1,'A'], [1,'B'], [2,'C'], [3, 'B'], [1,'C'], [2, 'A'], [3, 'D'] )
+     .groupTuple(by: 1)
+     .view()
+```
+
+emits:
+
+```
+[[1, 2], A]
+[[1, 3], B]
+[[2, 1], C]
+[[3], D]
+```
+
+Available parameters:
+
+|Field|Description|
+|-----|-----------|
+|by|The index (zero based) of the element to be used as grouping key. A key composed by multiple elements can be defined specifying a list of indices e.g. by: `[0,2]`|
+|sort|Defines the sorting criteria for the grouped items. See below for available sorting options.|
+|size|The number of items the grouped list(s) has to contain. When the specified size is reached, the tuple is emitted.|
+|remainder|When `false` incomplete tuples (i.e. with less than size grouped items) are discarded (default). When `true` incomplete tuples are emitted as the ending emission. Only valid when a `size` parameter is specified.|
+
+Sorting options:
+
+|Sort|Description|
+|----|-----------|
+|false|No sorting is applied (default).|
+|true|Order the grouped items by the item natural ordering i.e. numerical for number, lexicographic for string, etc. See http://docs.oracle.com/javase/tutorial/collections/interfaces/order.html|
+|hash|Order the grouped items by the hash number associated to each entry.|
+|deep|Similar to the previous, but the hash number is created on actual entries content e.g. when the item is a file, the hash is created on the actual file content.|
+|*custom*|A custom sorting criterion used to order the tuples element holding list of values. It can be specified by using either a [Closure](https://www.nextflow.io/docs/latest/script.html#script-closure) or a [Comparator](http://docs.oracle.com/javase/7/docs/api/java/util/Comparator.html) object.
+|
+
+**TIP:** You should always specify the number of expected elements in each tuple using the size attribute to allow the `groupTuple` operator to stream the collected values as soon as possible. However, there are use cases in which each tuple has a different size depending on the grouping key. In this case use the built-in function `groupKey` that allows you to create a special grouping key object such that it’s possible to associate the group size for a given key.
+
 ## Splitting operators
 
 ## Combining operators
