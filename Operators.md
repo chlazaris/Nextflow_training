@@ -605,6 +605,146 @@ Sorting options:
 
 **TIP:** You should always specify the number of expected elements in each tuple using the size attribute to allow the `groupTuple` operator to stream the collected values as soon as possible. However, there are use cases in which each tuple has a different size depending on the grouping key. In this case use the built-in function `groupKey` that allows you to create a special grouping key object such that it’s possible to associate the group size for a given key.
 
+### map
+
+The `map` operator applies a function of your choosing to every item emitted by a channel, and returns the items so obtained as a new channel. The function applied is called the *mapping* function and is expressed with a [closure](https://nextflow.io/docs/latest/script.html#script-closure) as shown in the example below:
+
+```
+Channel
+    .from( 1, 2, 3, 4, 5 )
+    .map { it * it }
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+emits:
+
+```
+1
+4
+9
+16
+25
+Done
+```
+
+### reduce
+
+The `reduce` operator applies a function of your choosing to every item emitted by a channel. Each time this function is invoked it takes two parameters: firstly the *i-th* emitted item and secondly the result of the previous invocation of the function itself. The result is passed on to the next function call, along with the *i+1* th item, until all the items are processed.
+
+Finally, the `reduce` operator emits the result of the last invocation of your function as the sole output.
+
+For example:
+
+```
+Channel
+    .from( 1, 2, 3, 4, 5 )
+    .reduce { a, b -> println "a: $a b: $b"; return a+b }
+    .view { "result = $it" }
+```
+
+emits:
+
+```
+a: 1 b: 2
+a: 3 b: 3
+a: 6 b: 4
+a: 10 b: 5
+result = 15
+```
+
+**TIP:** A common use case for this operator is to use the first parameter as an *accumulator* the second parameter as the i-th item to be processed (THIS IS UNCLEAR).
+
+Optionally you can specify a seed value in order to initialise the accumulator parameter as shown below:
+
+```
+myChannel.reduce( seedValue ) {  a, b -> ... }
+```
+
+### toList
+
+The `toList` operator collects all the items emitted by a channel to a `List` object and emits the resulting collection as a single item. For example:
+
+```
+Channel
+    .from( 1, 2, 3, 4 )
+    .toList()
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+emits:
+
+```
+[1,2,3,4]
+Done
+```
+
+See also: [collect](https://nextflow.io/docs/latest/operator.html#collect) operator.
+
+### toSortedList
+
+The `toSortedList` operator collects all the items emitted by a channel to a `List` object where they are sorted and emits the resulting collection as a single item. For example:
+
+```
+Channel
+    .from( 3, 2, 1, 4 )
+    .toSortedList()
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+emits:
+
+```
+[1,2,3,4]
+Done
+```
+
+You may also pass a comparator closure as an argument to the `toSortedList` operator to customize the sorting criteria. For example, to sort by the second element of a tuple in descending order:
+
+```
+Channel
+    .from( ["homer", 5], ["bart", 2], ["lisa", 10], ["marge", 3], ["maggie", 7])
+    .toSortedList( { a, b -> b[1] <=> a[1] } )
+    .view()
+```
+
+which emits:
+
+```
+[[lisa, 10], [maggie, 7], [homer, 5], [marge, 3], [bart, 2]]
+```
+
+See also: [collect](https://nextflow.io/docs/latest/operator.html#collect) operator.
+
+### transpose
+
+The `transpose` operator transforms a channel in such a way that the emitted items are the result of a transposition of all tuple elements in each item. For example:
+
+```
+Channel.from([
+    ['a', ['p', 'q'], ['u','v'] ],
+    ['b', ['s', 't'], ['x','y'] ]
+    ])
+    .transpose()
+    .view()
+```
+
+emits:
+
+```
+[a, p, u]
+[a, q, v]
+[b, s, x]
+[b, t, y]
+```
+
+Available parameters:
+
+|Field|Description|
+|----|----|
+|by|The index (zero based) of the element to be transposed. Multiple elements can be defined specifying as list of indices e.g. `by: [0,2]|`
+|remainder|When `false`, incomplete tuples are discarded (default). When `true`, incomplete tuples are emitted containing a `null` in place of a missing element.
+|
+
 ## Splitting operators
 
 ## Combining operators
