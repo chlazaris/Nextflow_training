@@ -742,10 +742,79 @@ Available parameters:
 |Field|Description|
 |----|----|
 |by|The index (zero based) of the element to be transposed. Multiple elements can be defined specifying as list of indices e.g. `by: [0,2]|`
-|remainder|When `false`, incomplete tuples are discarded (default). When `true`, incomplete tuples are emitted containing a `null` in place of a missing element.
-|
+|remainder|When `false`, incomplete tuples are discarded (default). When `true`, incomplete tuples are emitted containing a `null` in place of a missing element.|
 
 ## Splitting operators
+
+These operators are used to split items emitted by channels into chunks that can be processed by downstream operators or processes.
+
+The available splitting operators are:
+
+* [splitCsv](https://www.nextflow.io/docs/latest/operator.html#splitcsv)
+* [splitFasta](https://www.nextflow.io/docs/latest/operator.html#splitfasta)
+* [splitFastq](https://www.nextflow.io/docs/latest/operator.html#splitfastq)
+* [splitText](https://www.nextflow.io/docs/latest/operator.html#splittext)
+
+### splitCsv
+
+The `splitCsv` operator allows you to parse text items emitted by a channel, that are formatted using the [CSV format](http://en.wikipedia.org/wiki/Comma-separated_values), and split them into records or group them into list of records with a specified length.
+
+In the simplest case, just apply the `splitCsv` operator ro a channel emitting a CSV-formatted text file or text entry. For example:
+
+```
+Channel
+    .from( 'alpha,beta,gamma\n10,20,30\n70,80,90' )
+    .splitCsv()
+    .view(row -> "${row[0]} - ${row[1]} - ${row[2]}")
+```
+
+The above example shows how CSV text is parsed and is split into single rows. Values can be accessed by its column index in the row object.
+
+When the CSV file begins with a header line defining the column names, you can specify the parameter `header: true` which allows you to reference each value by its name, as shown in the following example:
+
+```
+Channel
+    .from( 'alpha,beta,gamma\n10,20,30\n70,80,90' )
+    .splitCsv(header: true)
+    .view { row -> "${row.alpha} - ${row.beta} - ${row.gamma}" }
+```
+
+which emits:
+
+```
+10 - 20 - 30
+70 - 80 - 90
+```
+
+Alternatively, you can provide custom header names by specifying a the list of strings in the header parameter as shown below:
+
+```
+Channel
+    .from( 'alpha,beta,gamma\n10,20,30\n70,80,90' )
+    .splitCsv(header: ['col1', 'col2', 'col3'], skip: 1 )
+    .view { row -> "${row.col1} - ${row.col2} - ${row.col3}" }
+```
+
+Available parameters:
+
+|Field|Description|
+|-----|-----------|
+|by|The number of rows in each *chunk*|
+|sep|The character used to separate the values (default: `,`)|
+|quote|Values may be quoted by single or double quote characters.|
+|header|When `true` the first line is used as columns names. Alternatively it can be used to provide the list of columns names.|
+|charset|Parse the content by using the specified charset e.g. `UTF-8`|
+|strip|Removes leading and trailing blanks from values (default: `false`)|
+|skip|Number of lines since the file beginning to ignore when parsing the CSV content.|
+|limit|Limits the number of retrieved records for each file to the specified value.|
+|decompress|When `true` decompress the content using the GZIP format before processing it (note: files whose name ends with .gz extension are decompressed automatically)|
+|elem|The index of the element to split when the operator is applied to a channel emitting list/tuple objects (default: first file object or first element)|
+
+### splitFasta
+
+### splitFastq
+
+### splitText
 
 ## Combining operators
 
