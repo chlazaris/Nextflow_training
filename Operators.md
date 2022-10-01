@@ -929,6 +929,55 @@ The following fields are available when using the `record` parameter:
 
 ### splitText
 
+The `splitText` operator allows you to split multi-line strings or text file items, emitted by a source channel into chunks containing n lines, which will be emitted by the resulting channel.
+
+For example:
+
+```
+Channel
+    .fromPath('/some/path/*.txt')
+    .splitText()
+    .view()
+```
+
+It splits the content of the files with suffix `.txt`, and prints it line by line.
+
+By default, the `splitText` operator splits each item into chunks of one line. You can define the number of lines in each chunk by using the parameter `by`, as shown in the following example:
+
+```
+Channel
+    .fromPath('/some/path/*.txt')
+    .splitText( by: 10 )
+    .subscribe {
+        print it;
+        print "--- end of the chunk ---\n"
+    }
+```
+
+An optional [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) can be specified in order to transform the text chunks produced by the operator. The following example shows how to split text files into chunks of 10 lines and transform them to capital letters:
+
+```
+Channel
+    .fromPath('/some/path/*.txt')
+    .splitText( by: 10 ) { it.toUpperCase() }
+    .view()
+```
+
+**NOTE:** Text chunks returned by the operator `splitText` are always terminated by a `\n` newline character.
+
+Available parameters:
+
+|Field|Description|
+|-----|-----|
+|by|Defines the number of lines in each chunk (default: `1`).|
+|limit|Limits the number of retrieved lines for each file to the specified value.|
+|charset|Parse the content by using the specified charset e.g. `UTF-8.`|
+|compress|When `true` resulting file chunks are GZIP compressed. The `.gz` suffix is automatically added to chunk file names.|
+|decompress|When true, decompress the content using the GZIP format before processing it (note: files whose name ends with `.gz` extension are decompressed automatically).|
+|file|When `true` saves each split to a file. Use a string instead of `true` value to create split files with a specific name (split index number is automatically added). Finally, set this attribute to an existing directory, in oder to save the split files into the specified folder.|
+|elem|The index of the element to split when the operator is applied to a channel emitting list/tuple objects (default: first file object or first element).|
+|keepHeader|Parses the first line as header and prepends it to each emitted chunk.|
+
 ## Combining operators
 
 ## Forking operators
