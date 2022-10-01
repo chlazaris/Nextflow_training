@@ -812,6 +812,59 @@ Available parameters:
 
 ### splitFasta
 
+The `splitFasta` operator allows you to split the entries emitted by a channel, that are formatted using the [FASTA format](http://en.wikipedia.org/wiki/FASTA_format). It returns a channel which emits text item for each sequence in the received FASTA content.
+
+The number of sequences in each text chunk produced by the `splitFasta` operator can be set by using the `by` parameter. The following example shows how to read a FASTA file and split it into chunks containing 10 sequences each:
+
+```
+Channel
+     .fromPath('misc/sample.fa')
+     .splitFasta( by: 10 )
+     .view()
+```
+
+**WARNING:** Chunks are stored in memory by default. When splitting large files, specify the parameter `file: true` to save the chunks into files in order to avoid an `OutOfMemoryException`. See the parameter table below for details.
+
+A second version of the `splitFasta` operator allows you to split a FASTA content into record objects, instead of text chunks. A record object contains a set of fields that let you access and manipulate the FASTA sequence information with ease.
+
+In order to split a FASTA content into record objects, simply use the `record` parameter specifying the map of required the fields, as shown in the example below:
+
+```
+Channel
+     .fromPath('misc/sample.fa')
+     .splitFasta( record: [id: true, seqString: true ])
+     .filter { record -> record.id =~ /^ENST0.*/ }
+     .view { record -> record.seqString }
+```
+
+In this example, the file `misc/sample.fa` is split into records containing the `id` and the `seqString` fields (i.e. the sequence id and the sequence data). The following `filter` operator only keeps the sequences whose ID starts with the `ENST0` prefix, finally the sequence content is printed by using the `view` operator.
+
+Available parameters:
+
+|Field|Description|
+|----|----|
+|by|Defines the number of sequences in each *chunk* (default: `1`)|
+|size|Defines the size in memory units of the expected chunks eg. 1.MB.|
+|limit|Limits the number of retrieved sequences for each file to the specified value.|
+|record|Parse each entry in the FASTA file as record objects (see following table for accepted values)|
+|charset|Parse the content by using the specified charset e.g.` UTF-8`|
+|compress|When `true` resulting file chunks are GZIP compressed. The `.gz` suffix is automatically added to chunk file names.|
+|decompress|When `true`, decompress the content using the GZIP format before processing it (note: files whose name ends with .gz extension are decompressed automatically)|
+|file|When true saves each split to a file. Use a string instead of true value to create split files with a specific name (split index number is automatically added). Finally, set this attribute to an existing directory, in order to save the split files into the specified folder.|
+|elem|The index of the element to split when the operator is applied to a channel emitting list/tuple objects (default: first file object or first element)|
+
+The following fields are available when using the `record` parameter:
+
+|Field|Description|
+|-----|-----------|
+|id|The FASTA sequence identifier i.e. the word following the `>` symbol up to the first *blank* or *newline* character|
+|header|The first line in a FASTA sequence without the `>` character|
+|desc|The text in the FASTA header following the ID value|
+|text|The complete FASTA sequence including the header|
+|seqString|The sequence data as a single line string i.e. containing no *newline* characters|
+|sequence|The sequence data as a multi-line string (always ending with a *newline* character)|
+|width|Define the length of a single line when the `sequence` field is used, after that the sequence data continues on a new line.|
+
 ### splitFastq
 
 ### splitText
