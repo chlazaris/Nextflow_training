@@ -867,6 +867,66 @@ The following fields are available when using the `record` parameter:
 
 ### splitFastq
 
+The `splitFastq` operator allows you to split the entries emitted by a channel, that are formatted using the [FASTQ format](http://en.wikipedia.org/wiki/FASTQ_format). It returns a channel which emits a text chunk for each sequence in the received item.
+
+The number of sequences in each text chunk produced by the `splitFastq` operator is defined by the parameter `by`. The following example shows you how to read a FASTQ file and split it into chunks containing 10 sequences each:
+
+```
+Channel
+    .fromPath('misc/sample.fastq')
+    .splitFastq( by: 10 )
+    .view()
+```
+
+**WARNING:** Chunks are stored in memory by default. When splitting large files, specify the parameter `file: true` to save the chunks into files in order to avoid an `OutOfMemoryException`. See the parameter table below for details.
+
+A second version of the `splitFastq` operator allows you to split a FASTQ formatted content into record objects, instead of text chunks. A record object contains a set of fields that let you access and manipulate the FASTQ sequence data with ease.
+
+In order to split FASTQ sequences into record objects simply use the `record` parameter specifying the map of the required fields, or just specify `record: true` as in the example shown below:
+
+```
+Channel
+    .fromPath('misc/sample.fastq')
+    .splitFastq( record: true )
+    .view { record -> record.readHeader }
+```
+
+Finally the `splitFastq` operator is able to split paired-end read pair FASTQ files. It must be applied to a channel which emits tuples containing at least two elements that are the files to be splitted. For example:
+
+```
+Channel
+    .fromFilePairs('/my/data/SRR*_{1,2}.fastq', flat: true)
+    .splitFastq(by: 100_000, pe: true, file: true)
+    .view()
+```
+
+**NOTE:** The `fromFilePairs` requires the `flat: true` option in order to emit the file pairs as separate elements in the produced tuples.
+
+**NOTE:** This operator assumes that the order of the paired-end reads correspond with each other and both files contain the same number of reads.
+
+Available parameters:
+
+|Field|Description|
+|----|----|
+|by|Defines the number of reads in each *chunk* (default: `1`)|
+|pe|When `true` splits paired-end read files, therefore items emitted by the source channel must be tuples in which at least two elements are the read-pair files to be splitted.|
+|limit|Limits the number of retrieved *reads* for each file to the specified value.|
+|record|Parse each entry in the FASTQ file as record objects (see following table for accepted values)|
+|charset|Parse the content by using the specified charset e.g.` UTF-8`|
+|compress|When `true` resulting file chunks are GZIP compressed. The `.gz` suffix is automatically added to chunk file names.|
+|decompress|When `true`, decompress the content using the GZIP format before processing it (note: files whose name ends with .gz extension are decompressed automatically)|
+|file|When true saves each split to a file. Use a string instead of true value to create split files with a specific name (split index number is automatically added). Finally, set this attribute to an existing directory, in order to save the split files into the specified folder.|
+|elem|The index of the element to split when the operator is applied to a channel emitting list/tuple objects (default: first file object or first element)|
+
+The following fields are available when using the `record` parameter:
+
+|Field|Description|
+|-----|-----------|
+|readHeader|Sequence header (without the `@` prefix)|
+|readString|The raw sequence data|
+|qualityHeader|Base quality header (it may be empty)|
+|qualityString|Quality values for the sequence|
+
 ### splitText
 
 ## Combining operators
