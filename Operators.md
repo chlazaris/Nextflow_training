@@ -980,6 +980,189 @@ Available parameters:
 
 ## Combining operators
 
+The combining operators are:
+
+* [cross](https://www.nextflow.io/docs/latest/operator.html#cross)
+* [collectFile](https://www.nextflow.io/docs/latest/operator.html#collectfile)
+* [combine](https://www.nextflow.io/docs/latest/operator.html#combine)
+* [concat](https://www.nextflow.io/docs/latest/operator.html#concat)
+* [join](https://www.nextflow.io/docs/latest/operator.html#join)
+* [merge](https://www.nextflow.io/docs/latest/operator.html#merge)
+* [mix](https://www.nextflow.io/docs/latest/operator.html#mix)
+* [phase](https://www.nextflow.io/docs/latest/operator.html#phase)
+* [spread](https://www.nextflow.io/docs/latest/operator.html#spread)
+* [tap](https://www.nextflow.io/docs/latest/operator.html#tap)
+
+### cross
+
+The `cross` operator allows you to combine the items of two channels in such a way that the items of the source channel are emitted along with the items emitted by the target channel for which they have a matching key.
+
+The key is defined, by default, as the first entry in an array, a list or map object, or the value itself for any other data type. For example:
+
+```
+source = Channel.from( [1, 'alpha'], [2, 'beta'] )
+target = Channel.from( [1, 'x'], [1, 'y'], [1, 'z'], [2,'p'], [2,'q'], [2,'t'] )
+
+source.cross(target).view()
+```
+
+emits:
+
+```
+[ [1, alpha], [1, x] ]
+[ [1, alpha], [1, y] ]
+[ [1, alpha], [1, z] ]
+[ [2, beta],  [2, p] ]
+[ [2, beta],  [2, q] ]
+[ [2, beta],  [2, t] ]
+```
+
+The above example shows how the items emitted by the source channels are associated to the ones emitted by the target channel (on the right) having the same key.
+
+There are two important caveats when using the `cross` operator:
+
+1. The operator is not *commutative*, i.e. the result of `a.cross(b)` is different from `b.cross(a)`
+2. The source channel emits items for which there’s no key repetition i.e. the emitted items have an unique key identifier.
+
+Optionally, a mapping function can be specified in order to provide a custom rule to associate an item to a key, in a similar manner as shown for the [phase](https://www.nextflow.io/docs/latest/operator.html#phase) operator.
+
+### collectFile
+
+### combine
+
+The combine `operator` combines (cartesian product) the items emitted by two channels or by a channel and a `Collection` object (as right operand). For example:
+
+```
+numbers = Channel.from(1,2,3)
+words = Channel.from('hello', 'ciao')
+numbers
+    .combine(words)
+    .view()
+```
+
+emits:
+
+```
+[1, hello]
+[2, hello]
+[3, hello]
+[1, ciao]
+[2, ciao]
+[3, ciao]
+```
+
+A second version of the combine operator allows you to combine between them those items that share a common matching key. The index of the key element is specified by using the by parameter (the index is zero-based, multiple indexes can be specified with list a integers). For example:
+
+```
+left = Channel.from(['A',1], ['B',2], ['A',3])
+right = Channel.from(['B','x'], ['B','y'], ['A','z'], ['A', 'w'])
+
+left
+    .combine(right, by: 0)
+    .view()
+```
+
+emits:
+
+```
+[A, 1, z]
+[A, 3, z]
+[A, 1, w]
+[A, 3, w]
+[B, 2, x]
+[B, 2, y]
+```
+
+See also [join](https://www.nextflow.io/docs/latest/operator.html#join), [cross](https://www.nextflow.io/docs/latest/operator.html#cross), [spead](https://www.nextflow.io/docs/latest/operator.html#spread), and [phase](https://www.nextflow.io/docs/latest/operator.html#phase)
+
+### concat
+
+The `concat` operator allows you to concatenate the items emitted by two or more channels to a new channel, in such a way that the items emitted by the resulting channel are in same order as they were when specified as operator arguments.
+
+In other words it guarantees that given any *n* channels, the concatenation channel emits the items proceeding from the channel *i+1 th* only after all the items proceeding from the channel *i th* were emitted.
+
+For example:
+
+```
+a = Channel.from('a','b','c')
+b = Channel.from(1,2,3)
+c = Channel.from('p','q')
+
+c.concat( b, a ).view()
+```
+
+emits:
+
+```
+p
+q
+1
+2
+3
+a
+b
+c
+```
+
+### join
+
+The `join` operator creates a channel that joins together the items emitted by two channels for which exists a matching key. The key is defined, by default, as the first element in each item emitted.
+
+For example:
+
+```
+left = Channel.from(['X', 1], ['Y', 2], ['Z', 3], ['P', 7])
+right= Channel.from(['Z', 6], ['Y', 5], ['X', 4])
+left.join(right).view()
+```
+
+emits:
+
+```
+[Z, 3, 6]
+[Y, 2, 5]
+[X, 1, 4]
+```
+
+The *index* of a different matching element can be specified by using the `by` parameter.
+
+The `join` operator can emit all the pairs that are incomplete, i.e. the items for which a matching element is missing, by specifying the optional parameter `remainder` as shown below:
+
+```
+left = Channel.from(['X', 1], ['Y', 2], ['Z', 3], ['P', 7])
+right= Channel.from(['Z', 6], ['Y', 5], ['X', 4])
+left.join(right, remainder: true).view()
+```
+
+emits:
+
+```
+[Y, 2, 5]
+[Z, 3, 6]
+[X, 1, 4]
+[P, 7, null]
+```
+
+The following parameters can be used with the join operator:
+
+|Name|Description|
+|----|-----------|
+|by|The index (zero based) of the element to be used as grouping key. A key composed by multiple elements can be defined specifying a list of indices e.g. `by: [0,2]`|
+|remainder|When `false` incomplete tuples (i.e. with less than size grouped items) are discarded (default). When `true` incomplete tuples are emitted as the ending emission.|
+|failOnDuplicate|An error is reported when the same key is found more than once.|
+|failOnMismatch|An error is reported when a channel emits a value for which there isn’t a corresponding element in the joining channel. This option cannot be used with `remainder`.|
+
+### merge
+
+### mix
+
+### phase
+
+### spread
+
+### tap
+
+
 ## Forking operators
 
 ## Math operators
