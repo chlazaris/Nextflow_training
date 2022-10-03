@@ -1154,14 +1154,153 @@ The following parameters can be used with the join operator:
 
 ### merge
 
+The `merge` operator lets you join items emitted by two (or more) channels into a new channel.
+
+For example the following code merges two channels together, one which emits a series of odd integers and the other which emits a series of even integers:
+
+```
+odds  = Channel.from([1, 3, 5, 7, 9]);
+evens = Channel.from([2, 4, 6]);
+
+odds
+    .merge( evens )
+    .view()
+```
+
+emits:
+
+```
+[1, 2]
+[3, 4]
+[5, 6]
+```
+
+An option closure can be provide to customize the items emitted by the resulting merged channel. For example:
+
+```
+odds  = Channel.from([1, 3, 5, 7, 9]);
+evens = Channel.from([2, 4, 6]);
+
+odds
+    .merge( evens ) { a, b -> tuple(b*b, a) }
+    .view()
+```
+
+emits:
+
+```
+[4, 1]
+[16, 3]
+[36, 5]
+```
+
+**NOTE** If using DSL2, you will receive a message that `merge` is deprecated and will be removed in a future release.
+
+**DANGER:** When this operator is used to *merge* the outputs of two processes, keep in mind that the resulting merged channel will have non-deterministic behavior and may cause your pipeline execution to not resume properly. Because each process is executed in parallel and produces its outputs independently, there is no guarantee that they will be executed in the same order. Therefore the content of the resulting merged channel may have a different order on each run and may cause the resume to not work properly. For a better alternative use the [join](https://www.nextflow.io/docs/latest/operator.html#join) operator instead.
+
 ### mix
+
+The `mix` operator combines the items emitted by two (or more) channels into a single channel.
+
+For example:
+
+```
+c1 = Channel.from( 1,2,3 )
+c2 = Channel.from( 'a','b' )
+c3 = Channel.from( 'z' )
+
+c1.mix(c2,c3)
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+emits:
+
+```
+1
+2
+3
+'a'
+'b'
+'z'
+```
+
+**NOTE:** The items emitted by the resulting mixed channel may appear in any order, regardless of which source channel they came from. Thus, the following example could also be a possible result of the above example:
+
+```
+'z'
+1
+'a'
+2
+'b'
+3
+```
+
+To make sure that the order is retained, use [concat](https://www.nextflow.io/docs/latest/operator.html#concat).
 
 ### phase
 
+**WARNING:** This operator is deprecated. Use the [join][(https://www.nextflow.io/docs/latest/operator.html#join) operator instead.
+
 ### spread
+
+**WARNING:** This operator is deprecated. Use the [combine](https://www.nextflow.io/docs/latest/operator.html#combine) operator instead.
 
 ### tap
 
+The `tap` operator combines the functions of [into](https://www.nextflow.io/docs/latest/operator.html#into) and [separate](https://www.nextflow.io/docs/latest/operator.html#separate) operators in such a way that it connects two channels, copying the values from the source into the *tapped* channel. At the same time it splits the source channel into a newly created channel that is returned by the operator itself.
+
+The `tap` operator can be useful in certain scenarios where you may be required to concatenate multiple operations, as in the following example:
+
+```
+log1 = Channel.create()
+log2 = Channel.create()
+
+Channel
+    .of ( 'a', 'b', 'c' )
+    .tap ( log1 )
+    .map { it * 2 }
+    .tap ( log2 )
+    .map { it.toUpperCase() }
+    .view { "Result: $it" }
+
+log1.view { "Log 1: $it" }
+log2.view { "Log 2: $it" }
+```
+
+which emits:
+
+```
+Result: AA
+Result: BB
+Result: CC
+
+Log 1: a
+Log 1: b
+Log 1: c
+
+Log 2: aa
+Log 2: bb
+Log 2: cc
+```
+
+The `tap` operator also allows the target channel to be specified by using a closure. The advantage of this syntax is that you won’t need to previously create the target channel, because it is created implicitly by the operator itself.
+
+Using the closure syntax the above example can be rewritten as shown below:
+
+```
+Channel
+    .of ( 'a', 'b', 'c' )
+    .tap { log1 }
+    .map { it * 2 }
+    .tap { log2 }
+    .map { it.toUpperCase() }
+    .view { "Result: $it" }
+
+log1.view { "Log 1: $it" }
+log2.view { "Log 2: $it" }
+```
+
+See also [into](https://www.nextflow.io/docs/latest/operator.html#into) and [separate](https://www.nextflow.io/docs/latest/operator.html#separate) operators.
 
 ## Forking operators
 
