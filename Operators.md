@@ -1028,6 +1028,111 @@ Optionally, a mapping function can be specified in order to provide a custom rul
 
 ### collectFile
 
+The `collectFile` operator allows you to gather the items emitted by a channel and save them to one or more files. The operator returns a new channel that emits the collected file(s).
+
+In the simplest case, just specify the name of a file where the entries have to be stored. For example:
+
+```
+Channel
+    .from('alpha', 'beta', 'gamma')
+    .collectFile(name: 'sample.txt', newLine: true)
+    .subscribe {
+        println "Entries are saved to file: $it"
+        println "File content is: ${it.text}"
+    }
+```
+
+A second version of the `collectFile` operator allows you to gather the items emitted by a channel and group them together into files whose name can be defined by a dynamic criteria. The grouping criteria is specified by a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) that must return a pair in which the first element defines the file name for the group and the second element the actual value to be appended to that file. For example:
+
+```
+Channel
+    .from('Hola', 'Ciao', 'Hello', 'Bonjour', 'Halo')
+    .collectFile() { item ->
+        [ "${item[0]}.txt", item + '\n' ]
+    }
+    .subscribe {
+        println "File ${it.name} contains:"
+        println it.text
+    }
+```
+
+emits:
+
+```
+File 'B.txt' contains:
+Bonjour
+
+File 'C.txt' contains:
+Ciao
+
+File 'H.txt' contains:
+Halo
+Hola
+Hello
+```
+
+**TIP:** When the items emitted by the source channel are files, the grouping criteria can be omitted. In this case the items content will be grouped into file(s) having the same name as the source items.
+
+The following parameters can be used with the `collectFile` operator:
+
+|Name|Description|
+|----|-----------|
+|`cache`|Controls the caching ability of the `collectFile` operator when using the *resume* feature. It follows the same semantic of the [cache](https://www.nextflow.io/docs/latest/process.html#process-cache) directive (default: `true`).|
+|`keepHeader`|Prepend the resulting file with the header fetched in the first collected file. The header size (ie. lines) can be specified by using the `skip` parameter (default: `false`), to determine how many lines to remove from all collected files except for the first (where no lines will be removed).|
+|`name`|Name of the file where all received values are stored.|
+|`newLine`|Appends a `newline` character automatically after each entry (default: `false`).|
+|`seed`|A value or a map of values used to initialise the files content.|
+|`skip`|Skip the first n lines eg. `skip: 1`.|
+|`sort`|Defines sorting criteria of content in resulting file(s). See below for sorting options.|
+|`storeDir`|Folder where the resulting file(s) are be stored.|
+|`tempDir`|Folder where temporary files, used by the collecting process, are stored.|
+
+**NOTE:** The file content is sorted in such a way that it does not depend on the order in which entries were added to it, which guarantees that it is consistent (i.e. does not change) across different executions with the same data.
+
+The ordering of file’s content can be defined by using the `sort` parameter. The following criteria can be specified:
+
+|Sort|Description|
+|----|-----------|
+|`false`|Disable content sorting. Entries are appended as they are produced.|
+|`true`|Order the content by the entries natural ordering i.e. numerical for number, lexicographic for string, etc. See: http://docs.oracle.com/javase/tutorial/collections/interfaces/order.html|
+|`index`|Order the content by the incremental index number assigned to each entry while they are collected.|
+|`hash`|Order the content by the hash number associated to each entry (default)|
+|`deep`|Similar to the previous, but the hash number is created on actual entries content e.g. when the entry is a file the hash is created on the actual file content.|
+|*custom*|A custom sorting criteria can be specified by using either a [Closure](https://www.nextflow.io/docs/latest/script.html#script-closure) or a [Comparator](http://docs.oracle.com/javase/7/docs/api/java/util/Comparator.html) object.|
+
+For example the following snippet shows how sort the content of the result file alphabetically:
+
+```
+Channel
+    .from('Z'..'A')
+    .collectFile(name:'result', sort: true, newLine: true)
+    .view { it.text }
+```
+
+emits:
+
+```
+A
+B
+C
+:
+Z
+```
+
+The following example shows how use a closure to collect and sort all sequences in a FASTA file from shortest to longest:
+
+```
+Channel
+    .fromPath('/data/sequences.fa')
+    .splitFasta( record: [id: true, sequence: true] )
+    .collectFile( name:'result.fa', sort: { it.size() } )  {
+        it.sequence
+    }
+    .view { it.text }
+```
+
+**WARNING:** The `collectFile` operator needs to store files in a temporary folder that is automatically deleted on workflow completion. For performance reasons this folder is located in the machine’s local storage, and it will require as much free space as the data that is being collected. Optionally, a different temporary data folder can be specified by using the `tempDir` parameter.
+
 ### combine
 
 The combine `operator` combines (cartesian product) the items emitted by two channels or by a channel and a `Collection` object (as right operand). For example:
@@ -1241,9 +1346,87 @@ To make sure that the order is retained, use [concat](https://www.nextflow.io/do
 
 **WARNING:** This operator is deprecated. Use the [join][(https://www.nextflow.io/docs/latest/operator.html#join) operator instead.
 
+The `phase` operator creates a channel that synchronizes the values emitted by two other channels, in such a way that it emits pairs of items that have a matching key.
+
+The key is defined, by default, as the first entry in an array, a list or map object, or the value itself for any other data type.
+
+For example:
+
+```
+ch1 = Channel.from( 1,2,3 )
+ch2 = Channel.from( 1,0,0,2,7,8,9,3 )
+ch1 .phase(ch2) .view()
+```
+
+emits:
+
+```
+[1,1]
+[2,2]
+[3,3]
+```
+
+Optionally, a mapping function can be specified in order to provide a custom rule to associate an item to a key, as shown in the following example:
+
+```
+ch1 = Channel.from( [sequence: 'aaaaaa', id: 1], [sequence: 'bbbbbb', id: 2] )
+ch2 = Channel.from( [val: 'zzzz', id: 3], [val: 'xxxxx', id: 1], [val: 'yyyyy', id: 2])
+ch1 .phase(ch2) { it -> it.id } .view()
+```
+
+emits:
+
+```
+[[sequence:aaaaaa, id:1], [val:xxxxx, id:1]]
+[[sequence:bbbbbb, id:2], [val:yyyyy, id:2]]
+```
+
+Finally, the `phase` operator can emit all the pairs that are incomplete, i.e. the items for which a matching element is missing, by specifying the optional parameter remainder as shown below:
+
+```
+ch1 = Channel.from( 1,0,0,2,5,3 )
+ch2 = Channel.from( 1,2,3,4 )
+ch1 .phase(ch2, remainder: true) .view()
+```
+
+emits:
+
+```
+[1, 1]
+[2, 2]
+[3, 3]
+[0, null]
+[0, null]
+[5, null]
+[null, 4]
+```
+
+See also the [join](https://www.nextflow.io/docs/latest/operator.html#join) operator.
+
 ### spread
 
 **WARNING:** This operator is deprecated. Use the [combine](https://www.nextflow.io/docs/latest/operator.html#combine) operator instead.
+
+The `spread` operator combines the items emitted by the source channel with all the values in an array or a `Collection` object specified as the operator argument. For example:
+
+```
+Channel
+    .from(1,2,3)
+    .spread(['a','b'])
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+emits:
+
+```
+[1, 'a']
+[1, 'b']
+[2, 'a']
+[2, 'b']
+[3, 'a']
+[3, 'b']
+Done
+```
 
 ### tap
 
