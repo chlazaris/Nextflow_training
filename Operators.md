@@ -1487,6 +1487,100 @@ See also [into](https://www.nextflow.io/docs/latest/operator.html#into) and [sep
 
 ## Forking operators
 
+The forking operators are:
+
+* [branch](https://www.nextflow.io/docs/latest/operator.html#branch)
+* [choice](https://www.nextflow.io/docs/latest/operator.html#choice)
+* [multiMap](https://www.nextflow.io/docs/latest/operator.html#multimap)
+* [into](https://www.nextflow.io/docs/latest/operator.html#into)
+* [separate](https://www.nextflow.io/docs/latest/operator.html#separate)
+* [tap](https://www.nextflow.io/docs/latest/operator.html#tap)
+
+### branch
+
+**NOTE:** Requires Nextflow version `19.08.0-edge` or later.
+
+The `branch` operator allows you to forward the items emitted by a source channel to one or more output channels, *choosing* one out of them at a time.
+
+The selection criteria are defined by specifying a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) that provides one or more boolean expressions, each of which is identified by a unique label. On the first expression that evaluates to a true value, the current item is bound to a named channel as the label identifier. For example:
+
+```
+Channel
+    .from(1,2,3,40,50)
+    .branch {
+        small: it < 10
+        large: it > 10
+    }
+    .set { result }
+
+ result.small.view { "$it is small" }
+ result.large.view { "$it is large" }
+```
+
+emits:
+
+```
+1 is small
+2 is small
+3 is small
+40 is large
+50 is large
+```
+
+**NOTE:** The above *small* and *large* strings may be printed in any order due to the asynchronous execution of the `view` operator.
+
+A default fallback condition can be specified using `true` as the last branch condition:
+
+```
+Channel
+    .from(1,2,3,40,50)
+    .branch {
+        small: it < 10
+        large: it < 50
+        other: true
+    }
+```
+
+The value returned by each branch condition can be customized by specifying an optional expression statement(s) just after the condition expression. For example:
+
+```
+Channel
+    .from(1,2,3,40,50)
+    .branch {
+        foo: it < 10
+            return it+2
+
+        bar: it < 50
+            return it-2
+
+        other: true
+            return 0
+    }
+```
+
+**TIP:** When the `return` keyword is omitted, the value of the last statement is implicitly returned.
+
+To create a branch criteria as variable that can be passed as an argument to more than one `branch` operator use the `branchCriteria` built-in method as shown below:
+
+```
+def criteria = branchCriteria {
+    small: it < 10
+    large: it > 10
+}
+
+Channel.from(1,2,30).branch(criteria).set { ch1 }
+Channel.from(10,20,1).branch(criteria).set { ch2 }
+```
+
+### choice
+
+### multiMap
+
+### into
+
+### separate
+
+### tap
 ## Math operators
 
 ## Other operators
