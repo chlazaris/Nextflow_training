@@ -1574,6 +1574,26 @@ Channel.from(10,20,1).branch(criteria).set { ch2 }
 
 ### choice
 
+**WARNING:** The choice operator has been deprecated. Use [branch](https://www.nextflow.io/docs/latest/operator.html#branch) instead.
+
+The `choice` operator allows you to forward the items emitted by a source channel to two (or more) output channels, *choosing* one out of them at a time.
+
+The destination channel is selected by using a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) that must return the *index* number of the channel where the item has to be sent. The first channel is identified by the index `0`, the second as `1` and so on.
+
+The following example sends all string items beginning with `Hello` into `queue1`, the others into `queue2`:
+
+```
+source = Channel.from 'Hello world', 'Hola', 'Hello John'
+queue1 = Channel.create()
+queue2 = Channel.create()
+
+source.choice( queue1, queue2 ) { a -> a =~ /^Hello.*/ ? 0 : 1 }
+
+queue1.view()
+```
+
+See also [branch](https://www.nextflow.io/docs/latest/operator.html#branch) operator.
+
 ### multiMap
 
 ### into
