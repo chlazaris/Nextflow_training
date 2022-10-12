@@ -1596,11 +1596,247 @@ See also [branch](https://www.nextflow.io/docs/latest/operator.html#branch) oper
 
 ### multiMap
 
+**NOTE:** Requires Nextflow version `19.11.0-edge`or later
+
+The `multiMap` operator allows you to forward the items emitted by a source channel to two or more output channels mapping each input value as a separate element.
+
+The mapping criteria is defined by specifying a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) that specify the target channels labelled by a unique identifier followed by an expression statement that evaluates the value to be assigned to such channel.
+
+For example:
+
+```
+Channel
+    .from(1,2,3,4)
+    .multiMap { it ->
+        foo: it + 1
+        bar: it * it
+    }
+    .set { result }
+
+result.foo.view { "foo $it" }
+result.bar.view { "bar $it" }
+```
+
+emits:
+
+```
+foo 2
+foo 3
+foo 4
+foo 5
+bar 1
+bar 4
+bar 9
+bar 16
+```
+
+The statement expression can be omitted when the value to be emitted is the same as the following one. If you just need to forward the same value to multiple channels, you can use the following shorthand:
+
+```
+Channel
+    .from(1,2,3)
+    .multiMap { it -> foo: bar: it }
+    .set { result }
+```
+
+As before this creates two channels but now both of them receive the same source items.
+
+To create a multi-map criteria as a variable that can be passed as an argument to more than one `multiMap` operators use the `multiMapCriteria` built-in method as shown below:
+
+```
+def criteria = multiMapCriteria {
+    small: it < 10
+    large: it > 10
+}
+
+Channel.from(1,2,30).multiMap(criteria).set { ch1 }
+Channel.from(10,20,1).multiMap(criteria).set { ch2 }
+```
+
 ### into
+
+**WARNING:** The `into` operator is no longer available in DSL2 syntax.
+
+The `into` operator connects a source channel to two or more target channels in such a way the values emitted by the source channel are copied to the target channels. For example:
+
+```
+Channel
+     .from( 'a', 'b', 'c' )
+     .into{ foo; bar }
+
+ foo.view{ "Foo emit: " + it }
+ bar.view{ "Bar emit: " + it }
+```
+
+emits:
+
+```
+Foo emit: a
+Foo emit: b
+Foo emit: c
+Bar emit: a
+Bar emit: b
+Bar emit: c
+```
+
+**NOTE:** Note the use in this example of curly brackets and the `;` as channel names separator. This is needed because the actual parameter of `into` is a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) which defines the target channels to which the source channel is connected.
+
+A second version of the `into` operator takes an integer *n* as an argument and returns a list of *n* channels, each of which emits a copy of the items that were emitted by the source channel. For example:
+
+```
+(foo, bar) = Channel.from( 'a','b','c').into(2)
+foo.view{ "Foo emit: " + it }
+bar.view{ "Bar emit: " + it }
+```
+
+**NOTE:** The above example takes advantage of the [multiple assignment](https://www.nextflow.io/docs/latest/script.html#script-multiple-assignment) syntax in order to assign two variables at once using the list of channels returned by the `into` operator.
+
+See also [tap](https://www.nextflow.io/docs/latest/operator.html#tap) and [separate](https://www.nextflow.io/docs/latest/operator.html#separate) operators.
 
 ### separate
 
+**WARNING** The `separate` operator has been deprecated. Use `multiMap` instead.
+
+The `separate` operator lets you copy the items emitted by the source channel into multiple channels, which each of these can receive a *separate* version of the same item.
+
+The operator applies a *mapping function* of your choosing to every item emitted by the source channel. This function must return a list of as many values as there are output channels. Each entry in the result list will be assigned to the output channel with the corresponding position index. For example:
+
+```
+queue1 = Channel.create()
+queue2 = Channel.create()
+
+Channel
+    .from ( 2,4,8 )
+    .separate( queue1, queue2 ) { a -> [a+1, a*a] }
+
+queue1.view { "Channel 1: $it" }
+queue2.view { "Channel 2: $it" }
+```
+
+emits:
+
+```
+Channel 1: 3
+Channel 2: 4
+Channel 1: 5
+Channel 2: 16
+Channel 2: 64
+Channel 1: 9
+```
+
+When the `mapping` function is omitted, the source channel must emit tuples of values. In this case the operator `separate` splits the tuple in such a way that the value *i-th* in a tuple is assigned to the target channel with the corresponding position index. For example:
+
+```
+alpha = Channel.create()
+delta = Channel.create()
+
+Channel
+    .from([1,2], ['a','b'], ['p','q'])
+    .separate( alpha, delta )
+
+alpha.view { "first : $it" }
+delta.view { "second: $it" }
+```
+
+emits: 
+
+```
+first : 1
+first : a
+first : p
+second: 2
+second: b
+second: q
+```
+
+A second version of the `separate` operator takes an integer *n* as an argument and returns a list of *n* channels, each of which gets a value from the corresponding element in the list returned by the closure as explained above. For example:
+
+```
+source = Channel.from(1,2,3)
+(queue1, queue2, queue3) = source.separate(3) { a -> [a, a+1, a*a] }
+
+queue1.view { "Queue 1 > $it" }
+queue2.view { "Queue 2 > $it" }
+queue3.view { "Queue 3 > $it" }
+```
+
+emits:
+
+```
+Queue 1 > 1
+Queue 1 > 2
+Queue 1 > 3
+Queue 2 > 2
+Queue 2 > 3
+Queue 2 > 4
+Queue 3 > 1
+Queue 3 > 4
+Queue 3 > 9
+```
+
+**NOTE:** In the above example, since the `subscribe` operator is asynchronous, the output of `channel1`, `channel2`, and `channel3` may be printed in any order.
+
+**NOTE:** The above example takes advantage of the [multiple assignment](https://www.nextflow.io/docs/latest/script.html#script-multiple-assignment) syntax in order to assign two variables at once using the list of channels returned by the `separate` operator.
+
+See also: [multiMap](https://www.nextflow.io/docs/latest/operator.html#multimap), [into](https://www.nextflow.io/docs/latest/operator.html#into), [choice](https://www.nextflow.io/docs/latest/operator.html#choice), and [map](https://www.nextflow.io/docs/latest/operator.html#map) operators.
+
 ### tap
+
+The `tap` operator combines the functions of [into](https://www.nextflow.io/docs/latest/operator.html#into) and [separate](https://www.nextflow.io/docs/latest/operator.html#separate) operators in such a way that it connects two channels, copying the values from the source into the *tapped* channel. At the same time it splits the source channel into a newly created channel that is returned by the operator itself.
+
+The `tap` operator can be useful in certain scenarios where you may be required to concatenate multiple operations, as in the following example:
+
+```
+log1 = Channel.create()
+log2 = Channel.create()
+
+Channel
+    .of ( 'a', 'b', 'c' )
+    .tap ( log1 )
+    .map { it * 2 }
+    .tap ( log2 )
+    .map { it.toUpperCase() }
+    .view { "Result: $it" }
+
+log1.view { "Log 1: $it" }
+log2.view { "Log 2: $it" }
+```
+
+emits:
+
+```
+Result: AA
+Result: BB
+Result: CC
+
+Log 1: a
+Log 1: b
+Log 1: c
+
+Log 2: aa
+Log 2: bb
+Log 2: cc
+```
+
+The `tap` operator also allows the target channel to be specified by using a closure. The advantage of this syntax is that you won’t need to previously create the target channel, because it is created implicitly by the operator itself.
+
+Using the closure syntax the above example can be rewritten as shown below:
+
+```
+Channel
+    .of ( 'a', 'b', 'c' )
+    .tap { log1 }
+    .map { it * 2 }
+    .tap { log2 }
+    .map { it.toUpperCase() }
+    .view { "Result: $it" }
+
+log1.view { "Log 1: $it" }
+log2.view { "Log 2: $it" }
+```
+
+See also [into](https://www.nextflow.io/docs/latest/operator.html#into) and [separate](https://www.nextflow.io/docs/latest/operator.html#separate) operators.
+
 ## Math operators
 
 ## Other operators
