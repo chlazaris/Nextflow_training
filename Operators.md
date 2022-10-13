@@ -1839,4 +1839,206 @@ See also [into](https://www.nextflow.io/docs/latest/operator.html#into) and [sep
 
 ## Math operators
 
+### count
+
+The `count` operator creates a channel that emits a single item: a number that represents the total number of items emitted by the source channel. For example:
+
+```
+Channel
+    .of(9,1,7,5)
+    .count()
+    .view()
+```
+
+emits:
+
+```
+4
+```
+
+An optional parameter can be provided in order to select which items are to be counted. The selection criteria can be specified either as a [regular expression](https://www.nextflow.io/docs/latest/script.html#script-regexp), a literal value, a Java class, or a *boolean predicate* that needs to be satisfied. For example:
+
+```
+Channel
+    .of(4,1,7,1,1)
+    .count(1)
+    .view()
+```
+
+emits:
+
+```
+3
+```
+
+```
+Channel
+    .of('a','c','c','q','b')
+    .count ( ~/c/ )
+    .view()
+```
+
+emits:
+
+```
+2
+```
+
+```
+Channel
+    .of('a','c','c','q','b')
+    .count { it <= 'c' }
+    .view()
+```
+
+emits:
+
+```
+4
+```
+
+### countBy
+
+The `countBy` operator creates a channel which emits an associative array (i.e. `Map` object) that counts the occurrences of the emitted items in the source channel having the same key. For example:
+
+```
+Channel
+    .of( 'x', 'y', 'x', 'x', 'z', 'y' )
+    .countBy()
+    .view()
+```
+
+emits:
+
+```
+[x:3, y:2, z:1]
+```
+
+An optional grouping criteria can be specified by using a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) that associates each item with the grouping key. For example:
+
+```
+Channel
+    .of( 'hola', 'hello', 'ciao', 'bonjour', 'halo' )
+    .countBy { it[0] }
+    .view()
+```
+
+```
+[h:3, c:1, b:1]
+```
+
+### max
+
+The `max` operator waits until the source channel completes, and then emits the item that has the greatest value. For example:
+
+```
+Channel
+    .of( 8, 6, 2, 5 )
+    .max()
+    .view { "Max value is $it" }
+```
+
+emits:
+
+```
+Max value is 8
+```
+
+An optional [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) parameter can be specified in order to provide a function that returns the value to be compared. The example below shows how to find the string item that has the maximum length:
+
+```
+Channel
+    .of("hello","hi","hey")
+    .max { it.size() }
+    .view()
+```
+
+emits:
+
+```
+hello
+```
+
+Alternatively, it is possible to specify a comparator function i.e. a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) taking two parameters that represent two emitted items to be compared. For example:
+
+```
+Channel
+    .of("hello","hi","hey")
+    .max { a,b -> a.size() <=> b.size() }
+    .view()
+```
+
+### min
+
+The `min` operator waits until the source channel completes, and then emits the item that has the lowest value. For example:
+
+```
+Channel
+    .of( 8, 6, 2, 5 )
+    .min()
+    .view { "Min value is $it" }
+```
+
+emits:
+
+```
+Min value is 2
+```
+
+An optional [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) parameter can be specified in order to provide a function that returns the value to be compared. The example below shows how to find the string item that has the minimum length:
+
+```
+Channel
+    .of("hello","hi","hey")
+    .min { it.size() }
+    .view()
+```
+
+emits:
+
+```
+hi
+```
+
+Alternatively it is possible to specify a comparator function i.e. a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) taking two parameters that represent two emitted items to be compared. For example:
+
+```
+Channel
+    .of("hello","hi","hey")
+    .min { a,b -> a.size() <=> b.size() }
+    .view()
+```
+
+### sum
+
+The `sum` operator creates a channel that emits the sum of all the items emitted by the channel itself. For example:
+
+```
+Channel
+    .of( 8, 6, 2, 5 )
+    .sum()
+    .view { "The sum is $it" }
+```
+
+emits:
+
+```
+The sum is 21
+```
+
+An optional [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) parameter can be specified in order to provide a function that, given an item, returns the value to be summed. For example:
+
+```
+Channel
+    .of( 4, 1, 7, 5 )
+    .sum { it * it }
+    .view { "Square: $it" }
+```
+
+emits:
+
+```
+Square: 91
+```
+
 ## Other operators
