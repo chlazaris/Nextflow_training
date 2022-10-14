@@ -2042,3 +2042,194 @@ Square: 91
 ```
 
 ## Other operators
+
+### close
+
+The `close` operator sends a termination signal over the channel, causing downstream processes or operators to stop. In a common usage scenario channels are closed automatically by Nextflow, so you won’t need to use this operator explicitly.
+
+See also: [empty](https://www.nextflow.io/docs/latest/channel.html#channel-empty) factory method.
+
+### empty
+
+The `empty` factory method, by definition, creates a channel that doesn’t emit any value.
+
+See also: [ifEmpty](https://www.nextflow.io/docs/latest/operator.html#ifempty) and [close](https://www.nextflow.io/docs/latest/operator.html#close) operators.
+
+### ifEmpty
+
+The `ifEmpty` operator creates a channel which emits a default value, specified as the operator parameter, when the channel to which is applied is *empty* i.e. doesn’t emit any value. Otherwise it will emit the same sequence of entries as the original channel.
+
+Thus, the following example:
+
+```
+Channel 
+    .of(1,2,3) 
+    .ifEmpty('Hello') 
+    .view()
+```
+
+emits:
+
+```
+1
+2
+3
+```
+
+whereas
+
+```
+Channel 
+    .of() 
+    .ifEmpty('Hello') 
+    .view()
+```
+
+emits
+
+```
+Hello
+```
+
+The `ifEmpty` value parameter can be defined with a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure). In this case the result value of the closure evaluation will be emitted when the empty condition is satisfied.
+
+See also: [empty](https://www.nextflow.io/docs/latest/channel.html#channel-empty) method.
+
+### map
+
+The `map` operator applies a function of your choosing to every item emitted by a channel, and returns the items so obtained as a new channel. The function applied is called the *mapping* function and is expressed with a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) as shown in the example below:
+
+```
+Channel
+    .of( 1, 2, 3, 4, 5 )
+    .map { it * it }
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+
+which emits:
+
+```
+1
+4
+9
+16
+25
+Done
+```
+
+### print
+
+**WARNING** The `print` operator is no longer available in DSL2 syntax. Use [view](https://www.nextflow.io/docs/latest/operator.html#view) instead.
+
+The `print` operator prints the items emitted by a channel to the standard output. An optional [closure](closure) parameter can be specified to customize how items are printed. For example:
+
+```
+Channel
+    .from('foo', 'bar', 'baz', 'qux')
+    .print { it.toUpperCase() + ' ' }
+```
+
+emits:
+
+```
+FOO BAR BAZ QUX
+```
+
+See also: [println](https://www.nextflow.io/docs/latest/operator.html#println) and [view](https://www.nextflow.io/docs/latest/operator.html#view).
+
+### println
+
+**WARNING**: The `println` operator is no longer available in DSL2 syntax. Use [view](https://www.nextflow.io/docs/latest/operator.html#view) instead.
+
+The `println` operator prints the items emitted by a channel to the console standard output appending a *new line* character to each of them. For example:
+
+```
+Channel
+    .from('foo', 'bar', 'baz', 'qux')
+    .println()
+```
+
+emits:
+
+```
+foo
+bar
+baz
+qux
+```
+
+An optional closure parameter can be specified to customize how items are printed. For example:
+
+```
+Channel
+    .of('foo', 'bar', 'baz', 'qux')
+    .view { "~ $it" }
+```
+
+emits:
+
+```
+~ foo
+~ bar
+~ baz
+~ qux
+```
+
+See also: [print](https://www.nextflow.io/docs/latest/operator.html#print) and [view](https://www.nextflow.io/docs/latest/operator.html#view).
+
+### set
+
+The `set` operator assigns the channel to a variable whose name is specified as a closure parameter. For example:
+
+```
+Channel
+    .of(10, 20, 30)
+    .set { my_channel }
+```
+
+This is semantically equivalent to the following assignment:
+
+```
+my_channel = 
+    Channel.of(10, 20, 30)
+```
+
+However, the `set` operator is more idiomatic in Nextflow scripting, since it can be used at the end of a chain of operator transformations, thus resulting in a more fluent and readable operation.
+
+### view
+
+The `view` operator prints the items emitted by a channel to the console standard output. For example:
+
+```
+Channel
+    .of(1, 2, 3)
+    .view()
+```
+
+emits:
+
+```
+1
+2
+3
+```
+
+Each item is printed on a separate line unless otherwise specified by using the `newLine: false` optional parameter.
+
+How the channel items are printed can be controlled by using an optional closure parameter. The closure must return the actual value of the item to be printed:
+
+```
+Channel.of(1, 2, 3)
+    .map { it -> [it, it*it] }
+    .view { num, sqr -> "Square of: $num is $sqr" }
+```
+
+emits:
+
+```
+Square of: 1 is 1
+Square of: 2 is 4
+Square of: 3 is 9
+```
+
+**NOTE** Both the `view` and [print](https://www.nextflow.io/docs/latest/operator.html#print) (or [println](https://www.nextflow.io/docs/latest/operator.html#println)) operators consume the items emitted by the source channel to which they are applied. The main difference between them is that `view` operator returns a newly created channel that is identical to the source channel, while `print` does not. This allows the `view` operator to be chained like other operators.
