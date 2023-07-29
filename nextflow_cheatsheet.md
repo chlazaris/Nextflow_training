@@ -21,54 +21,68 @@ nextflow.enable.dsl = 2
 
 
 ### A minimal example
+
+In order to be able to use the same process twice in the `workflow` definition, we create the following `modules`: `.modules/p1/main.nf` and `.modules/p2/main.nf`. The contents for `.modules/p1/main.nf` are:
+
+```
+process p1 {
+
+    // Run locally instead of HPC or Cloud
+    executor 'local'  
+  
+    input:
+        path(x) 
+
+    output:
+        path("head.txt"), emit: head
+        /* p1.out will include all output files 
+        from p1, whereas emit gives this 
+        specific channel a name */
+        path("tail.txt"), emit: tail 
+
+    """
+    head $x > head.txt
+    tail $x > tail.txt
+    """
+}
+```
+
+and for `.modules/p2/main.nf`: 
+
+```
+process p2 {
+
+    executor 'local'
+    // Copy files out of the working directory
+    publishDir 'output_folder', mode: 'copy'  
+
+    input:
+        path(y)
+
+    output: 
+        path("*.gz")
+
+    """
+    gzip -f $y
+    """
+}
+```
+
+Then, we specify the `workflow` as shown below:
+
 ```
 #!/usr/bin/env nextflow
 nextflow.enable.dsl = 2
 
-// Create input channel. Each .txt file is one element.
-input_ch = Channel.fromPath( "*.txt" )  
+include { p1 as p1 } from './modules/p1'
+include { p2 as p2a } from './modules/p2'
+include { p2 as p2b } from './modules/p2'
 
 workflow { 
-  input_ch | p1
-  p1.out.output_ch2 | p2 | p3
-}
-
-process p1 {
-
-  // Run locally instead of HPC or Cloud
-  executor 'local'  
-  
-  input:
-    file(x) 
-
-  output:
-    file("head.txt")
-    /* p2.out will include all output files 
-    from p2, whereas emit gives this 
-    specific channel a name */
-    file("tail.txt"), emit: output_ch2  
-
-  """
-  head $x > head.txt
-  tail $x > tail.txt
-  """
-}
-
-process p2 {
-
-  executor 'local'
-  // Copy files out of the working directory
-  publishDir 'output_folder', mode: 'copy'  
-
-  input:
-    file(y)
-
-  output: 
-    file("*.gz")
-
-  """
-  gzip $y
-  """
+    input_ch = Channel.fromPath( "*.txt" ) 
+    p1(input_ch)
+    p1.out.head | p2a
+    p1.out.tail | p2b
 }
 ```
 
