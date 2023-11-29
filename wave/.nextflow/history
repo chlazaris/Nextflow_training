@@ -1,0 +1,17 @@
+2023-11-28 15:35:37	-	berserk_goldwasser	-	f2e2154063c2e8c1f339ad0e6ac470a9	be10865d-dd04-4955-a921-4622a8bd1c30	nextflow run main.nf -with-wave
+2023-11-28 15:36:52	-	pedantic_leibniz	-	08f9b72e3764abb9306b339dace4a8f2	c3f2513a-0aa6-4e74-bf58-28131acc672d	nextflow run main.nf -with-wave
+2023-11-28 15:37:19	3.2s	pedantic_yalow	ERR	246bdd3865dd4c01f07eacb35ede7bba	55987c81-d4a0-44bb-8e2f-b834b9c39dca	nextflow run main.nf -with-wave
+2023-11-28 15:39:16	13.7s	mad_austin	ERR	246bdd3865dd4c01f07eacb35ede7bba	05b7a0a4-ca56-43fe-84d1-6a38711dffc2	nextflow run main.nf -with-wave
+2023-11-28 15:42:41	13.4s	lethal_celsius	ERR	3a45d523f76c5c4d39a9871f317fae8e	480ca852-0067-4727-a472-5c85f3b929fc	nextflow run main.nf -with-wave
+2023-11-28 15:55:39	34s	confident_jepsen	ERR	a4d7b67a50044bf239e2105acad96696	872b31a3-7c24-4a70-8bdf-9ec3085f3851	nextflow run main.nf -with-wave
+2023-11-28 15:58:50	1.2s	scruffy_jepsen	ERR	a4d7b67a50044bf239e2105acad96696	3374c828-f387-47f1-a4e4-4055f662f60a	nextflow run main.nf
+2023-11-28 15:59:30	1.7s	furious_cajal	ERR	a4d7b67a50044bf239e2105acad96696	8f25be4c-3b00-4924-ae90-9423d3f743cd	nextflow run main.nf
+2023-11-28 16:12:38	859ms	thirsty_dubinsky	ERR	9ddc1db41f72d2f62b503baa16880f79	4e4c421b-575b-477b-8aa2-e232210c1623	nextflow run main.nf
+2023-11-28 16:15:15	33.9s	sleepy_gutenberg	ERR	9ddc1db41f72d2f62b503baa16880f79	529e4fac-ff8a-41a3-ba67-d36f730a734f	nextflow run main.nf -with-wave
+2023-11-29 10:10:43	1.3s	golden_bartik	ERR	705fc398a468c3f69b8523f10324a6ec	87b66fd3-4ff0-41bb-9c17-355e12f4d546	nextflow run main.nf -with-wave
+2023-11-29 10:12:29	-	elegant_swartz	-	77821bfcdd60b0714e1f1a1af076f674	da156f6e-f88f-4df7-a759-f4ec3d15bfcf	nextflow run main.nf -with-wave
+2023-11-29 10:14:52	4.9s	ridiculous_majorana	ERR	77821bfcdd60b0714e1f1a1af076f674	88b7ffed-c65e-47cd-aa26-4d6d3f97bc7b	nextflow run main.nf -with-wave
+2023-11-29 10:15:26	4.2s	insane_brahmagupta	ERR	77821bfcdd60b0714e1f1a1af076f674	c837b340-086c-4af0-b9fb-04683af20a91	nextflow run main.nf -with-wave
+2023-11-29 10:18:59	-	insane_noether	-	77821bfcdd60b0714e1f1a1af076f674	65793589-dca1-499a-be82-4f0f8b24ea12	nextflow run main.nf -with-wave
+2023-11-29 10:48:30	-	amazing_albattani	-	77821bfcdd60b0714e1f1a1af076f674	65793589-dca1-499a-be82-4f0f8b24ea12	nextflow run main.nf -with-wave -resume
+2023-11-29 10:48:54	34.2s	soggy_brattain	ERR	77821bfcdd60b0714e1f1a1af076f674	65793589-dca1-499a-be82-4f0f8b24ea12	nextflow run main.nf -with-wave -resume

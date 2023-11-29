@@ -1,0 +1,43 @@
+Unable to find image 'wave.seqera.io/wt/fcb14e79bbdf/wave/build:cowpy_env--a7a7d57a01428226' locally
+docker: Error response from daemon: unknown: INFO[0000] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0000] Retrieving image mambaorg/micromamba:1.5.1 from registry index.docker.io 
+INFO[0000] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0000] Returning cached image manifest              
+INFO[0001] Built cross stage deps: map[]                
+INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0001] Returning cached image manifest              
+INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0001] Returning cached image manifest              
+INFO[0001] Executing 0 build triggers                   
+INFO[0001] Building stage 'mambaorg/micromamba:1.5.1' [idx: '0', base-idx: '-1'] 
+INFO[0001] Checking for cached layer 195996028523.dkr.ecr.eu-west-1.amazonaws.com/wave/build/cache:a6554da839eaef51541bc3bc1f47f1522682bd3ef9e465fabfe10373c75211a9... 
+INFO[0001] No cached layer found for cmd RUN micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+INFO[0001] Cmd: USER                                    
+INFO[0001] Unpacking rootfs as cmd COPY --chown=$MAMBA_USER:$MAMBA_USER conda.yml /tmp/conda.yml requires it. 
+INFO[0004] COPY --chown=$MAMBA_USER:$MAMBA_USER conda.yml /tmp/conda.yml 
+INFO[0004] Taking snapshot of files...                  
+INFO[0004] RUN micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+INFO[0004] Initializing snapshotter ...                 
+INFO[0004] Taking snapshot of full filesystem...        
+INFO[0005] Cmd: /usr/local/bin/_dockerfile_shell.sh     
+INFO[0005] Args: [micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+INFO[0005] Util.Lookup returned: &{Uid:57439 Gid:57439 Username:mambauser Name: HomeDir:/home/mambauser} 
+INFO[0005] Performing slow lookup of group ids for mambauser 
+INFO[0005] Running: [/usr/local/bin/_dockerfile_shell.sh micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+error    libmamba Could not solve for environment specs
+    The following packages are incompatible
+    ├─ bzip2 1.0.8 h93a5062_5 does not exist (perhaps a typo or a missing channel);
+    ├─ ca-certificates 2023.11.17 hf0a4a13_0 does not exist (perhaps a typo or a missing channel);
+    ├─ libexpat 2.5.0 hb7217d7_1 does not exist (perhaps a typo or a missing channel);
+    ├─ libffi 3.4.4 hca03da5_0 does not exist (perhaps a typo or a missing channel);
+    ├─ libsqlite 3.44.2 h091b4b1_0 does not exist (perhaps a typo or a missing channel);
+    ├─ libzlib 1.2.13 h53f4e23_5 does not exist (perhaps a typo or a missing channel);
+    ├─ ncurses 6.4 h463b476_2 does not exist (perhaps a typo or a missing channel);
+    ├─ openssl 3.2.0 h0d3ecfb_1 does not exist (perhaps a typo or a missing channel);
+    ├─ python 3.12.0 h47c9636_0_cpython does not exist (perhaps a typo or a missing channel);
+    ├─ readline 8.2 h92ec313_1 does not exist (perhaps a typo or a missing channel);
+    ├─ tk 8.6.13 h5083fa2_1 does not exist (perhaps a typo or a missing channel);
+    └─ xz 5.4.2 h80987f9_0 does not exist (perhaps a typo or a missing channel).
+critical libmamba Could not solve for environment specs
+error building image: error building stage: failed to execute command: waiting for process to exit: exit status 1.
+See 'docker run --help'.

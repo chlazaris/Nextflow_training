@@ -1,0 +1,125 @@
+Nov-28 16:15:13.958 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf -with-wave
+Nov-28 16:15:14.024 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.10.0
+Nov-28 16:15:14.036 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/lazarch2/.nextflow/plugins; core-plugins: nf-amazon@2.1.4,nf-azure@1.3.2,nf-cloudcache@0.3.0,nf-codecommit@0.1.5,nf-console@1.0.6,nf-ga4gh@1.1.0,nf-google@1.8.3,nf-tower@1.6.3,nf-wave@1.0.0
+Nov-28 16:15:14.044 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Nov-28 16:15:14.044 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Nov-28 16:15:14.046 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Nov-28 16:15:14.055 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Nov-28 16:15:14.067 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/lazarch2/Desktop/wave/nextflow.config
+Nov-28 16:15:14.068 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/lazarch2/Desktop/wave/nextflow.config
+Nov-28 16:15:14.083 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Nov-28 16:15:14.403 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Nov-28 16:15:14.416 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [sleepy_gutenberg] DSL2 - revision: 9ddc1db41f
+Nov-28 16:15:14.417 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Nov-28 16:15:14.417 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-wave@1.0.0]
+Nov-28 16:15:14.417 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-wave version: 1.0.0
+Nov-28 16:15:14.429 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-wave@1.0.0' resolved
+Nov-28 16:15:14.429 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-wave@1.0.0'
+Nov-28 16:15:14.442 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-wave@1.0.0
+Nov-28 16:15:14.450 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /Users/lazarch2/.nextflow/secrets/store.json
+Nov-28 16:15:14.452 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@3c8a7e38] - activable => nextflow.secret.LocalSecretsProvider@3c8a7e38
+Nov-28 16:15:14.489 [main] DEBUG nextflow.Session - Session UUID: 529e4fac-ff8a-41a3-ba67-d36f730a734f
+Nov-28 16:15:14.489 [main] DEBUG nextflow.Session - Run name: sleepy_gutenberg
+Nov-28 16:15:14.490 [main] DEBUG nextflow.Session - Executor pool size: 10
+Nov-28 16:15:14.494 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Nov-28 16:15:14.497 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=30; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Nov-28 16:15:15.257 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.10.0 build 5889
+  Created: 15-10-2023 15:07 UTC (11:07 EDT)
+  System: Mac OS X 13.6.1
+  Runtime: Groovy 3.0.19 on OpenJDK 64-Bit Server VM 11.0.13+7-b1751.21
+  Encoding: UTF-8 (UTF-8)
+  Process: 72121@X32TNJL9CH [192.168.108.215]
+  CPUs: 10 - Mem: 32 GB (3.4 GB) - Swap: 0 (0)
+Nov-28 16:15:15.270 [main] DEBUG nextflow.Session - Work-dir: /Users/lazarch2/Desktop/wave/work [Mac OS X]
+Nov-28 16:15:15.286 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Nov-28 16:15:15.294 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Nov-28 16:15:15.296 [main] DEBUG nextflow.Session - Observer factory: WaveFactory
+Nov-28 16:15:15.326 [main] DEBUG io.seqera.wave.plugin.WaveClient - Wave config: WaveConfig(enabled:true, endpoint:https://wave.seqera.io, containerConfigUrl:[], tokensCacheMaxDuration:30m, condaOpts:CondaOpts(mambaImage=mambaorg/micromamba:1.5.1; basePackages=conda-forge::procps-ng, commands=null), spackOpts:SpackOpts(basePackages=null, commands=null), strategy:[conda], bundleProjectResources:null, buildRepository:null, cacheRepository:null, retryOpts:RetryOpts(delay:450ms, maxDelay:1m 30s, maxAttempts:10, jitter:0.25), httpClientOpts:HttpOpts(), freezeMode:null, dryRunMode:false)
+Nov-28 16:15:15.418 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Nov-28 16:15:15.424 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 11; maxThreads: 1000
+Nov-28 16:15:15.476 [main] DEBUG nextflow.Session - Session start
+Nov-28 16:15:15.577 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Nov-28 16:15:15.620 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Nov-28 16:15:15.620 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Nov-28 16:15:15.625 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Nov-28 16:15:15.628 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=10; memory=32 GB; capacity=10; pollInterval=100ms; dumpInterval=5m
+Nov-28 16:15:15.629 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Nov-28 16:15:15.694 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: Cowpy
+Nov-28 16:15:15.695 [main] DEBUG nextflow.Session - Igniting dataflow network (1)
+Nov-28 16:15:15.695 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > Cowpy
+Nov-28 16:15:15.696 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_bbbb68fe8b0c4cf9: /Users/lazarch2/Desktop/wave/main.nf
+Nov-28 16:15:15.696 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Nov-28 16:15:15.696 [main] DEBUG nextflow.Session - Session await
+Nov-28 16:15:15.737 [Actor Thread 3] DEBUG io.seqera.wave.plugin.WaveClient - Wave config: WaveConfig(enabled:true, endpoint:https://wave.seqera.io, containerConfigUrl:[], tokensCacheMaxDuration:30m, condaOpts:CondaOpts(mambaImage=mambaorg/micromamba:1.5.1; basePackages=conda-forge::procps-ng, commands=null), spackOpts:SpackOpts(basePackages=null, commands=null), strategy:[conda], bundleProjectResources:null, buildRepository:null, cacheRepository:null, retryOpts:RetryOpts(delay:450ms, maxDelay:1m 30s, maxAttempts:10, jitter:0.25), httpClientOpts:HttpOpts(), freezeMode:null, dryRunMode:false)
+Nov-28 16:15:15.787 [Actor Thread 3] DEBUG io.seqera.wave.plugin.WaveClient - Wave request: https://wave.seqera.io/container-token; attempt=1 - request: SubmitContainerTokenRequest(towerAccessToken:null, towerRefreshToken:null, towerWorkspaceId:null, towerEndpoint:https://api.tower.nf, workflowId:null, containerImage:null, containerFile:RlJPTSBtYW1iYW9yZy9taWNyb21hbWJhOjEuNS4xCkNPUFkgLS1jaG93bj0kTUFNQkFfVVNFUjokTUFNQkFfVVNFUiBjb25kYS55bWwgL3RtcC9jb25kYS55bWwKUlVOIG1pY3JvbWFtYmEgaW5zdGFsbCAteSAtbiBiYXNlIC1mIC90bXAvY29uZGEueW1sIFwKICAgICYmIG1pY3JvbWFtYmEgaW5zdGFsbCAteSAtbiBiYXNlIGNvbmRhLWZvcmdlOjpwcm9jcHMtbmcgXAogICAgJiYgbWljcm9tYW1iYSBjbGVhbiAtYSAteQpVU0VSIHJvb3QK, containerConfig:ContainerConfig(entrypoint:null, cmd:null, env:null, workingDir:null, layers:null), condaFile:Y2hhbm5lbHM6Ci0gc2VxZXJhCi0gY29uZGEtZm9yZ2UKLSBiaW9jb25kYQotIGRlZmF1bHRzCmRlcGVuZGVuY2llczoKLSAvVXNlcnMvbGF6YXJjaDIvYW5hY29uZGEzL2VudnMvY293cHlfZW52Cg==, spackFile:null, containerPlatform:linux/amd64, buildRepository:null, cacheRepository:null, timestamp:2023-11-28T16:15:15.782634-05:00, fingerprint:f2c3a0925dde43b6857a6df9abc2c1bd, freeze:false, format:null, dryRun:false)
+Nov-28 16:15:16.639 [Actor Thread 3] DEBUG io.seqera.wave.plugin.WaveClient - Wave response: statusCode=200; body={"containerToken":"684301dc04f9","targetImage":"wave.seqera.io/wt/684301dc04f9/wave/build:Userslazarch2anaconda3envscowpy_env--c77d9c4889a81fa1","expiration":"2023-11-30T09:15:16.565554016Z","containerImage":"195996028523.dkr.ecr.eu-west-1.amazonaws.com/wave/build:Userslazarch2anaconda3envscowpy_env--c77d9c4889a81fa1","buildId":"c77d9c4889a81fa1"}
+Nov-28 16:15:16.714 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Nov-28 16:15:16.715 [Task submitter] INFO  nextflow.Session - [52/e05d0f] Submitted process > Cowpy
+Nov-28 16:15:48.677 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: Cowpy; status: COMPLETED; exit: 125; error: -; workDir: /Users/lazarch2/Desktop/wave/work/52/e05d0f19b05f9c8c34a9684d2e8e3d]
+Nov-28 16:15:48.679 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=Cowpy; work-dir=/Users/lazarch2/Desktop/wave/work/52/e05d0f19b05f9c8c34a9684d2e8e3d
+  error [nextflow.exception.ProcessFailedException]: Process `Cowpy` terminated with an error exit status (125)
+Nov-28 16:15:48.690 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'Cowpy'
+
+Caused by:
+  Process `Cowpy` terminated with an error exit status (125)
+
+Command executed:
+
+  python cowpy.py
+
+Command exit status:
+  125
+
+Command output:
+  (empty)
+
+Command error:
+  Unable to find image 'wave.seqera.io/wt/684301dc04f9/wave/build:Userslazarch2anaconda3envscowpy_env--c77d9c4889a81fa1' locally
+  docker: Error response from daemon: unknown: INFO[0000] Retrieving image manifest mambaorg/micromamba:1.5.1 
+  INFO[0000] Retrieving image mambaorg/micromamba:1.5.1 from registry index.docker.io 
+  INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+  INFO[0001] Returning cached image manifest              
+  INFO[0001] Built cross stage deps: map[]                
+  INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+  INFO[0001] Returning cached image manifest              
+  INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+  INFO[0001] Returning cached image manifest              
+  INFO[0001] Executing 0 build triggers                   
+  INFO[0001] Building stage 'mambaorg/micromamba:1.5.1' [idx: '0', base-idx: '-1'] 
+  INFO[0001] Checking for cached layer 195996028523.dkr.ecr.eu-west-1.amazonaws.com/wave/build/cache:5a277f0c8a6e13a030de339554480544fa41a734a9e0805f738138a7785db104... 
+  INFO[0001] No cached layer found for cmd RUN micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+  INFO[0001] Cmd: USER                                    
+  INFO[0001] Unpacking rootfs as cmd COPY --chown=$MAMBA_USER:$MAMBA_USER conda.yml /tmp/conda.yml requires it. 
+  INFO[0004] COPY --chown=$MAMBA_USER:$MAMBA_USER conda.yml /tmp/conda.yml 
+  INFO[0004] Taking snapshot of files...                  
+  INFO[0004] RUN micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+  INFO[0004] Initializing snapshotter ...                 
+  INFO[0004] Taking snapshot of full filesystem...        
+  INFO[0004] Cmd: /usr/local/bin/_dockerfile_shell.sh     
+  INFO[0004] Args: [micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+  INFO[0004] Util.Lookup returned: &{Uid:57439 Gid:57439 Username:mambauser Name: HomeDir:/home/mambauser} 
+  INFO[0004] Performing slow lookup of group ids for mambauser 
+  INFO[0004] Running: [/usr/local/bin/_dockerfile_shell.sh micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+  error    libmamba Could not solve for environment specs
+      The following package could not be installed
+      └─ /users/lazarch2/anaconda3/envs/cowpy_env does not exist (perhaps a typo or a missing channel).
+  critical libmamba Could not solve for environment specs
+  error building image: error building stage: failed to execute command: waiting for process to exit: exit status 1.
+  See 'docker run --help'.
+
+Work dir:
+  /Users/lazarch2/Desktop/wave/work/52/e05d0f19b05f9c8c34a9684d2e8e3d
+
+Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
+Nov-28 16:15:48.695 [main] DEBUG nextflow.Session - Session await > all processes finished
+Nov-28 16:15:48.696 [Task monitor] DEBUG nextflow.Session - Session aborted -- Cause: Process `Cowpy` terminated with an error exit status (125)
+Nov-28 16:15:48.706 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Nov-28 16:15:48.707 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Nov-28 16:15:48.712 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=31.9s; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=0; ]
+Nov-28 16:15:48.936 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Nov-28 16:15:48.936 [main] INFO  org.pf4j.AbstractPluginManager - Stop plugin 'nf-wave@1.0.0'
+Nov-28 16:15:48.936 [main] DEBUG nextflow.plugin.BasePlugin - Plugin stopped nf-wave
+Nov-28 16:15:48.947 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

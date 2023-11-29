@@ -1,0 +1,83 @@
+Nov-28 16:12:37.503 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf
+Nov-28 16:12:37.563 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.10.0
+Nov-28 16:12:37.575 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/lazarch2/.nextflow/plugins; core-plugins: nf-amazon@2.1.4,nf-azure@1.3.2,nf-cloudcache@0.3.0,nf-codecommit@0.1.5,nf-console@1.0.6,nf-ga4gh@1.1.0,nf-google@1.8.3,nf-tower@1.6.3,nf-wave@1.0.0
+Nov-28 16:12:37.581 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Nov-28 16:12:37.582 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Nov-28 16:12:37.584 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Nov-28 16:12:37.592 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Nov-28 16:12:37.604 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/lazarch2/Desktop/wave/nextflow.config
+Nov-28 16:12:37.605 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/lazarch2/Desktop/wave/nextflow.config
+Nov-28 16:12:37.618 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Nov-28 16:12:37.946 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Nov-28 16:12:37.956 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [thirsty_dubinsky] DSL2 - revision: 9ddc1db41f
+Nov-28 16:12:37.956 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Nov-28 16:12:37.956 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Nov-28 16:12:37.962 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /Users/lazarch2/.nextflow/secrets/store.json
+Nov-28 16:12:37.964 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@2b0dc227] - activable => nextflow.secret.LocalSecretsProvider@2b0dc227
+Nov-28 16:12:38.001 [main] DEBUG nextflow.Session - Session UUID: 4e4c421b-575b-477b-8aa2-e232210c1623
+Nov-28 16:12:38.002 [main] DEBUG nextflow.Session - Run name: thirsty_dubinsky
+Nov-28 16:12:38.002 [main] DEBUG nextflow.Session - Executor pool size: 10
+Nov-28 16:12:38.012 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Nov-28 16:12:38.015 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=30; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Nov-28 16:12:38.053 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.10.0 build 5889
+  Created: 15-10-2023 15:07 UTC (11:07 EDT)
+  System: Mac OS X 13.6.1
+  Runtime: Groovy 3.0.19 on OpenJDK 64-Bit Server VM 11.0.13+7-b1751.21
+  Encoding: UTF-8 (UTF-8)
+  Process: 71834@X32TNJL9CH [192.168.108.215]
+  CPUs: 10 - Mem: 32 GB (3.4 GB) - Swap: 0 (0)
+Nov-28 16:12:38.068 [main] DEBUG nextflow.Session - Work-dir: /Users/lazarch2/Desktop/wave/work [Mac OS X]
+Nov-28 16:12:38.083 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Nov-28 16:12:38.089 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Nov-28 16:12:38.099 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Nov-28 16:12:38.106 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 11; maxThreads: 1000
+Nov-28 16:12:38.151 [main] DEBUG nextflow.Session - Session start
+Nov-28 16:12:38.275 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Nov-28 16:12:38.320 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Nov-28 16:12:38.320 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Nov-28 16:12:38.324 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Nov-28 16:12:38.326 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=10; memory=32 GB; capacity=10; pollInterval=100ms; dumpInterval=5m
+Nov-28 16:12:38.328 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Nov-28 16:12:38.386 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: Cowpy
+Nov-28 16:12:38.387 [main] DEBUG nextflow.Session - Igniting dataflow network (1)
+Nov-28 16:12:38.387 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > Cowpy
+Nov-28 16:12:38.388 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_bbbb68fe8b0c4cf9: /Users/lazarch2/Desktop/wave/main.nf
+Nov-28 16:12:38.388 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Nov-28 16:12:38.388 [main] DEBUG nextflow.Session - Session await
+Nov-28 16:12:38.480 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Nov-28 16:12:38.482 [Task submitter] INFO  nextflow.Session - [3b/2839b0] Submitted process > Cowpy
+Nov-28 16:12:38.544 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: Cowpy; status: COMPLETED; exit: 127; error: -; workDir: /Users/lazarch2/Desktop/wave/work/3b/2839b042a9dc088da752405d91c68f]
+Nov-28 16:12:38.546 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=Cowpy; work-dir=/Users/lazarch2/Desktop/wave/work/3b/2839b042a9dc088da752405d91c68f
+  error [nextflow.exception.ProcessFailedException]: Process `Cowpy` terminated with an error exit status (127)
+Nov-28 16:12:38.553 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'Cowpy'
+
+Caused by:
+  Process `Cowpy` terminated with an error exit status (127)
+
+Command executed:
+
+  python cowpy.py
+
+Command exit status:
+  127
+
+Command output:
+  (empty)
+
+Command error:
+  .command.sh: line 2: python: command not found
+
+Work dir:
+  /Users/lazarch2/Desktop/wave/work/3b/2839b042a9dc088da752405d91c68f
+
+Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
+Nov-28 16:12:38.557 [main] DEBUG nextflow.Session - Session await > all processes finished
+Nov-28 16:12:38.559 [Task monitor] DEBUG nextflow.Session - Session aborted -- Cause: Process `Cowpy` terminated with an error exit status (127)
+Nov-28 16:12:38.571 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Nov-28 16:12:38.572 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Nov-28 16:12:38.575 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=12ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=0; ]
+Nov-28 16:12:38.855 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Nov-28 16:12:38.865 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

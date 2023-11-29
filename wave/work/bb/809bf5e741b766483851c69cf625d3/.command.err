@@ -1,0 +1,65 @@
+Unable to find image 'wave.seqera.io/wt/c4152c1ccfd8/wave/build:496b13b4b1c46e0f' locally
+docker: Error response from daemon: unknown: INFO[0000] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0000] Retrieving image mambaorg/micromamba:1.5.1 from registry index.docker.io 
+INFO[0000] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0000] Returning cached image manifest              
+INFO[0001] Built cross stage deps: map[]                
+INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0001] Returning cached image manifest              
+INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0001] Returning cached image manifest              
+INFO[0001] Executing 0 build triggers                   
+INFO[0001] Building stage 'mambaorg/micromamba:1.5.1' [idx: '0', base-idx: '-1'] 
+INFO[0001] Checking for cached layer 195996028523.dkr.ecr.eu-west-1.amazonaws.com/wave/build/cache:b23c2574c3e14ae1848e660464dac5954b85400e3de36ceaf934bc9b81704809... 
+INFO[0001] No cached layer found for cmd RUN     micromamba install -y -n base -c seqera -c conda-forge -c bioconda -c defaults -f https://anaconda.org/conda-forge/cowpy/1.1.5/download/noarch/cowpy-1.1.5-pyhd8ed1ab_1.conda     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+INFO[0001] Cmd: USER                                    
+INFO[0001] Unpacking rootfs as cmd RUN     micromamba install -y -n base -c seqera -c conda-forge -c bioconda -c defaults -f https://anaconda.org/conda-forge/cowpy/1.1.5/download/noarch/cowpy-1.1.5-pyhd8ed1ab_1.conda     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y requires it. 
+INFO[0004] RUN     micromamba install -y -n base -c seqera -c conda-forge -c bioconda -c defaults -f https://anaconda.org/conda-forge/cowpy/1.1.5/download/noarch/cowpy-1.1.5-pyhd8ed1ab_1.conda     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+INFO[0004] Initializing snapshotter ...                 
+INFO[0004] Taking snapshot of full filesystem...        
+INFO[0004] Cmd: /usr/local/bin/_dockerfile_shell.sh     
+INFO[0004] Args: [micromamba install -y -n base -c seqera -c conda-forge -c bioconda -c defaults -f https://anaconda.org/conda-forge/cowpy/1.1.5/download/noarch/cowpy-1.1.5-pyhd8ed1ab_1.conda     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+INFO[0004] Util.Lookup returned: &{Uid:57439 Gid:57439 Username:mambauser Name: HomeDir:/home/mambauser} 
+INFO[0004] Performing slow lookup of group ids for mambauser 
+INFO[0004] Running: [/usr/local/bin/_dockerfile_shell.sh micromamba install -y -n base -c seqera -c conda-forge -c bioconda -c defaults -f https://anaconda.org/conda-forge/cowpy/1.1.5/download/noarch/cowpy-1.1.5-pyhd8ed1ab_1.conda     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+info     libmamba ****************** Backtrace Start ******************
+debug    libmamba Loading configuration
+trace    libmamba Compute configurable 'create_base'
+trace    libmamba Compute configurable 'no_env'
+trace    libmamba Compute configurable 'no_rc'
+trace    libmamba Compute configurable 'rc_files'
+trace    libmamba Compute configurable 'root_prefix'
+trace    libmamba Get RC files configuration from locations up to HomeDir
+trace    libmamba Configuration not found at '/home/mambauser/.mambarc'
+trace    libmamba Configuration not found at '/home/mambauser/.mamba/mambarc.d'
+trace    libmamba Configuration not found at '/home/mambauser/.mamba/mambarc'
+trace    libmamba Configuration not found at '/home/mambauser/.mamba/.mambarc'
+trace    libmamba Configuration not found at '/home/mambauser/.config/mamba/mambarc.d'
+trace    libmamba Configuration not found at '/home/mambauser/.config/mamba/mambarc'
+trace    libmamba Configuration not found at '/home/mambauser/.config/mamba/.mambarc'
+trace    libmamba Configuration not found at '/home/mambauser/.condarc'
+trace    libmamba Configuration not found at '/home/mambauser/.conda/condarc.d'
+trace    libmamba Configuration not found at '/home/mambauser/.conda/condarc'
+trace    libmamba Configuration not found at '/home/mambauser/.conda/.condarc'
+trace    libmamba Configuration not found at '/home/mambauser/.config/mamba/../conda/condarc.d'
+trace    libmamba Configuration not found at '/home/mambauser/.config/mamba/../conda/condarc'
+trace    libmamba Configuration not found at '/home/mambauser/.config/mamba/../conda/.condarc'
+trace    libmamba Configuration not found at '/opt/conda/.mambarc'
+trace    libmamba Configuration not found at '/opt/conda/condarc.d'
+trace    libmamba Configuration not found at '/opt/conda/condarc'
+trace    libmamba Configuration not found at '/opt/conda/.condarc'
+trace    libmamba Configuration not found at '/var/lib/conda/.mambarc'
+trace    libmamba Configuration not found at '/var/lib/conda/condarc.d/'
+trace    libmamba Configuration not found at '/var/lib/conda/condarc'
+trace    libmamba Configuration not found at '/var/lib/conda/.condarc'
+trace    libmamba Configuration not found at '/etc/conda/.mambarc'
+trace    libmamba Configuration not found at '/etc/conda/condarc.d/'
+trace    libmamba Configuration not found at '/etc/conda/condarc'
+trace    libmamba Configuration not found at '/etc/conda/.condarc'
+trace    libmamba Update configurable 'no_env'
+trace    libmamba Compute configurable 'envs_dirs'
+trace    libmamba Compute configurable 'file_specs'
+critical libmamba failed to open https://anaconda.org/conda-forge/cowpy/1.1.5/download/noarch/cowpy-1.1.5-pyhd8ed1ab_1.conda: No such file or directory
+info     libmamba ****************** Backtrace End ********************
+error building image: error building stage: failed to execute command: waiting for process to exit: exit status 1.
+See 'docker run --help'.

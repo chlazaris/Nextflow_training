@@ -1,0 +1,32 @@
+Unable to find image 'wave.seqera.io/wt/baef82cb983d/wave/build:Userslazarch2anaconda3envscowpy_env--c77d9c4889a81fa1' locally
+docker: Error response from daemon: unknown: INFO[0000] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0000] Retrieving image mambaorg/micromamba:1.5.1 from registry index.docker.io 
+INFO[0000] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0000] Returning cached image manifest              
+INFO[0001] Built cross stage deps: map[]                
+INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0001] Returning cached image manifest              
+INFO[0001] Retrieving image manifest mambaorg/micromamba:1.5.1 
+INFO[0001] Returning cached image manifest              
+INFO[0001] Executing 0 build triggers                   
+INFO[0001] Building stage 'mambaorg/micromamba:1.5.1' [idx: '0', base-idx: '-1'] 
+INFO[0001] Checking for cached layer 195996028523.dkr.ecr.eu-west-1.amazonaws.com/wave/build/cache:5a277f0c8a6e13a030de339554480544fa41a734a9e0805f738138a7785db104... 
+INFO[0001] No cached layer found for cmd RUN micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+INFO[0001] Cmd: USER                                    
+INFO[0001] Unpacking rootfs as cmd COPY --chown=$MAMBA_USER:$MAMBA_USER conda.yml /tmp/conda.yml requires it. 
+INFO[0004] COPY --chown=$MAMBA_USER:$MAMBA_USER conda.yml /tmp/conda.yml 
+INFO[0004] Taking snapshot of files...                  
+INFO[0004] RUN micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y 
+INFO[0004] Initializing snapshotter ...                 
+INFO[0004] Taking snapshot of full filesystem...        
+INFO[0004] Cmd: /usr/local/bin/_dockerfile_shell.sh     
+INFO[0004] Args: [micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+INFO[0004] Util.Lookup returned: &{Uid:57439 Gid:57439 Username:mambauser Name: HomeDir:/home/mambauser} 
+INFO[0004] Performing slow lookup of group ids for mambauser 
+INFO[0004] Running: [/usr/local/bin/_dockerfile_shell.sh micromamba install -y -n base -f /tmp/conda.yml     && micromamba install -y -n base conda-forge::procps-ng     && micromamba clean -a -y] 
+error    libmamba Could not solve for environment specs
+    The following package could not be installed
+    └─ /users/lazarch2/anaconda3/envs/cowpy_env does not exist (perhaps a typo or a missing channel).
+critical libmamba Could not solve for environment specs
+error building image: error building stage: failed to execute command: waiting for process to exit: exit status 1.
+See 'docker run --help'.
